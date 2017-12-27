@@ -9,8 +9,9 @@ var generateBasicImportMap = function()
   {
     '4.05':
     {
-      'setjmp':            getGadget('libSceWebKit2', 0x270),     // setjmp imported from libkernel
-      '__stack_chk_fail': getGadget('libSceWebKit2', 0x2728DF8),
+      'setjmp':                  getGadget('libSceWebKit2', 0x270),     // setjmp imported from libkernel
+      '__stack_chk_fail_ptr':    getGadget('libSceWebKit2', 0x2729260), // __stack_chk_fail imported from libkernel
+      '__stack_chk_fail_offset': 0xD0D0,                                // offset of __stack_chk_fail from start of libkernel
     }
   };
 }

