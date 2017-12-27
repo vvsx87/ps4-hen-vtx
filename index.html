@@ -606,11 +606,11 @@
 
       // Create loader memory
       print("=== Launched Loader! ===");
-      var code_addr = new int64(0x26100000, 0x00000009);
-      var buffer = p.syscall("sys_mmap", code_addr, 0x300000, 7, 0x1000, -1, 0);
+      var code_addr = new int64(0x26000000, 0x00000009);
+      var buffer = p.syscall("sys_mmap", code_addr, 0x400000, 7, 0x1000, -1, 0);
 
       // Verify loaded
-      if(buffer == '926100000')
+      if(buffer == '926000000')
       {
           // Write kernel base
           p.write8(code_addr.add32(0xFFFF0), kernelBase);
