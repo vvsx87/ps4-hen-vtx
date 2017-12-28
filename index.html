@@ -631,6 +631,9 @@
           // run payloads forever
           for (;;)
           {
+              // Clear payload memory area before each run
+              p.call(libkernel.add32(0x130), code_addr.add32(0x100000), 0, 0x1FFFF8);
+
               var result = p.call(libkernel.add32(0x11570), thread_id_ptr, 0, code_addr, 0, thread_name);
               print("scePthreadCreate: 0x" + result);
               if (result == 0)
