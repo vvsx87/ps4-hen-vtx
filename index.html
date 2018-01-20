@@ -1,7 +1,7 @@
-<!-- This page was originally made by qwertyoruiopz -->
+<!-- This page was originally made by qwertyoruiopz, rewrite by Vortex -->
 <html>
 <head>
-  <title>JailbreakMe PS4 4.05 (FULL JAILBREAK)</title>
+  <title>JailbreakMe PS4 4.05 (HEN)</title>
   <meta name="viewport" content="user-scalable=1.0,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0">
   <meta name="apple-mobile-web-app-capable" content="no">
   <meta name="format-detection" content="telephone=no">
@@ -36,8 +36,7 @@
     }
   </style>
   <script src=fix.js></script>
-  <script src=prisonbreak.js></script>
-  <script src=loader.js></script>
+  <script src=payload.js></script>
   <script src=syscalls.js></script>
 </head>
 <body>
@@ -605,55 +604,33 @@
       print("getuid():  " + p.syscall('sys_getuid'));
 
       // Create loader memory
-      print("=== Launched Loader! ===");
-      var code_addr = new int64(0x26100000, 0x00000009);
-      var buffer = p.syscall("sys_mmap", code_addr, 0x300000, 7, 0x1000, -1, 0);
+      print("=== Launching Payload! ===");
+      var code_addr = new int64(0x26200000, 0x00000009);
+      var buffer = p.syscall("sys_mmap", code_addr, 0x200000, 7, 0x1000, -1, 0);
 
       // Verify loaded
-      if(buffer == '926100000')
+      if(buffer == '926200000')
       {
-          writePrisonBreak(p, code_addr);
-          p.call(code_addr);
-
-          // Write loader
-          writeLoader(p, code_addr);
+          // Clear payload memory area before run
+          p.call(libkernel.add32(0x130), code_addr, 0, 0x1FFFF8);
+          
+          // Write payload
+          writePayload(p, code_addr);
 
           // Write syscall gadget
-          p.write8(code_addr.add32(0x2FFFF8), libkernel.add32(0x29C7));
+          p.write8(code_addr.add32(0x1FFFF8), libkernel.add32(0x29C7));
 
           // Launch thread
-          var thread_id_ptr = malloc(0x08);
-          var thread_name = malloc(0x100);
-          var exit_code_ptr = malloc(0x08);
+          var thread = malloc(0x08);
+          var thr_name = malloc(0x100);
+          var tExitCode = malloc(0x08);
+          var exitMain = malloc(0x08);
 
-          p.writeString(thread_name, "loader");
+          p.writeString(thr_name, "payload");
 
-          // run payloads forever
-          for (;;)
-          {
-              // Clear payload memory area before each run
-              p.call(libkernel.add32(0x130), code_addr.add32(0x100000), 0, 0x1FFFF8);
+          p.call(libkernel.add32(0x11570), thread, 0, code_addr, 0, thr_name);
 
-              var result = p.call(libkernel.add32(0x11570), thread_id_ptr, 0, code_addr, 0, thread_name);
-              print("scePthreadCreate: 0x" + result);
-              if (result == 0)
-              {
-                  var thread_id = p.read8(thread_id_ptr);
-                  print("thread: 0x" + thread_id);
-                  print("=== Waiting for payload!!! ===");
-                  var result = p.call(libkernel.add32(0x11610), thread_id, exit_code_ptr);
-
-                  print("scePthreadJoin: 0x" + result);
-                  if (result == 0)
-                  {
-                      var exit_code = p.read8(exit_code_ptr);
-                      if (!confirm("exit code: " + exit_code + "\nAgain?"))
-                      {
-                          break;
-                      }
-                  }
-              }
-          }
+          print("=== Done. ===");
       }
       else
       {
@@ -665,7 +642,7 @@
   <script src=expl.js></script>
   <script src=gadgets.js></script>
   <script src=rop.js></script>
-  <center><h1 id=clck>...</h1><strong>WebKit by <a href='https://twitter.com/qwertyoruiopz'>qwertyoruiopz</a></strong><br/>Kernel by <a href='https://twitter.com/specterdev'>SpecterDev</a><br/>This exploit contains a 4.05 kernel exploit!<br/></center>
+  <center><h1 id=clck>...</h1><strong>WebKit by <a href='https://twitter.com/qwertyoruiopz'>qwertyoruiopz</a></strong><br/>Kernel by <a href='https://twitter.com/specterdev'>SpecterDev</a><br/>fself/fpkg by <a href='https://twitter.com/flat_z'>flatz</a><br/></center>
   <pre id="console" style="font-size: 20px"></pre>
 </body>
 </html>
