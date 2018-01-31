@@ -6,6 +6,8 @@
 
 #define kernel_printf(format, ...) (void)0
 
+#define PS4_UPDATE_FULL_PATH "/update/PS4UPDATE.PUP"
+
 const uint8_t payload_data_const[] =
 {
 #include "payload_data.inc"
@@ -280,6 +282,20 @@ int kernel_payload(struct thread *td, struct kernel_payload_args* args)
   return 0;
 }
 
+static inline void patch_update(void)
+{
+  DIR* directory = opendir(PS4_UPDATE_FULL_PATH);
+
+  if(directory != NULL)
+  {
+    closedir(directory);
+    return;
+  }
+
+  unlink(PS4_UPDATE_FULL_PATH);
+  mkdir(PS4_UPDATE_FULL_PATH, 0777);
+}
+
 int _main(struct thread *td) {
   int result;
 
@@ -296,6 +312,8 @@ int _main(struct thread *td) {
   result = kexec(&kernel_payload, NULL);
   printfsocket("kernel_payload: %d\n", result);
   if (result) goto exit;
+
+  patch_update();
 
   result = errno = do_patch();
   printfsocket("do_patch: %d\n", result);
