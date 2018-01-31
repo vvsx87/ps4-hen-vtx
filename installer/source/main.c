@@ -331,6 +331,9 @@ int _main(struct thread *td) {
   printfsocket("install_payload: %d\n", result);
   if (result) goto exit;
 
+  initSysUtil();
+  notify("Welcome to PS4HEN v"VERSION);
+
 exit:
   printfsocket("Done.\n");
 
