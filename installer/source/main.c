@@ -7,6 +7,7 @@
 #define kernel_printf(format, ...) (void)0
 
 #define PS4_UPDATE_FULL_PATH "/update/PS4UPDATE.PUP"
+#define PS4_UPDATE_TEMP_PATH "/update/PS4UPDATE.PUP.net.temp"
 
 const uint8_t payload_data_const[] =
 {
@@ -284,7 +285,9 @@ int kernel_payload(struct thread *td, struct kernel_payload_args* args)
 
 static inline void patch_update(void)
 {
-  DIR* directory = opendir(PS4_UPDATE_FULL_PATH);
+  unlink(PS4_UPDATE_FULL_PATH);
+
+  DIR* directory = opendir(PS4_UPDATE_TEMP_PATH);
 
   if(directory != NULL)
   {
@@ -292,8 +295,8 @@ static inline void patch_update(void)
     return;
   }
 
-  unlink(PS4_UPDATE_FULL_PATH);
-  mkdir(PS4_UPDATE_FULL_PATH, 0777);
+  unlink(PS4_UPDATE_TEMP_PATH);
+  mkdir(PS4_UPDATE_TEMP_PATH, 0777);
 }
 
 int _main(struct thread *td) {
