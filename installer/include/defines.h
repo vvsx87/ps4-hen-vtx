@@ -1,7 +1,7 @@
 #ifndef __DEFINES
 #define __DEFINES
 
-#define VERSION "1.2"
+#define VERSION "1.3"
 
 //#define DEBUG_SOCKET
 
@@ -91,6 +91,7 @@ struct install_payload_args
 
 struct kernel_payload_args
 {
+  void* syscall_handler;
   uint64_t user_arg;
 };
 

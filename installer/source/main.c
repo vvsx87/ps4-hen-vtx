@@ -286,16 +286,9 @@ int kernel_payload(struct thread *td, struct kernel_payload_args* args)
 static inline void patch_update(void)
 {
   unlink(PS4_UPDATE_FULL_PATH);
-
-  DIR* directory = opendir(PS4_UPDATE_TEMP_PATH);
-
-  if(directory != NULL)
-  {
-    closedir(directory);
-    return;
-  }
-
   unlink(PS4_UPDATE_TEMP_PATH);
+
+  mkdir(PS4_UPDATE_FULL_PATH, 0777);
   mkdir(PS4_UPDATE_TEMP_PATH, 0777);
 }
 
@@ -304,6 +297,8 @@ int _main(struct thread *td) {
 
   initKernel();	
   initLibc();
+
+  sceKernelSleep(1);
 
 #ifdef DEBUG_SOCKET
   initNetwork();
@@ -327,6 +322,7 @@ int _main(struct thread *td) {
   struct payload_info payload_info;
   payload_info.buffer = payload_data;
   payload_info.size = payload_size;
+
   errno = 0;
 
   result = kexec(&install_payload, &payload_info);

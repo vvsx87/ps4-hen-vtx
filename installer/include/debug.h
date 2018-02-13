@@ -1,6 +1,10 @@
 #ifndef DEBUG_H
 #define DEBUG_H
 
+#define PRIx64 "llx"
+#define PRIu64 "llu"
+#define PRId64 "lld"
+
 int sock;
 
 void initDebugSocket(void);
