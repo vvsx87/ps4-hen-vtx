@@ -2,3 +2,4 @@ build/
 tool/bin2js
 tool/bin2c
 *.bin
+*.map

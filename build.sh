@@ -6,11 +6,9 @@ pushd tool
 make
 popd
 
-pushd payload
+pushd kpayload
 make
 popd
-
-tool/bin2c payload/payload.bin > installer/source/payload_data.inc
 
 pushd installer
 make

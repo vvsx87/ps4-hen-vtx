@@ -9,24 +9,24 @@
 #include "rif_helper.h"
 #include "ccp_helper.h"
 
-extern void* (*real_memcpy)(void* dst, const void* src, size_t len) PAYLOAD_DATA;
-extern void* (*real_memcmp)(const void *b1, const void *b2, size_t len) PAYLOAD_DATA;
-extern void* (*real_memset)(void *s, int c, size_t n) PAYLOAD_DATA;
-extern int (*real_sx_xlock)(struct sx *sx, int opts) PAYLOAD_DATA;
-extern int (*real_sx_xunlock)(struct sx *sx) PAYLOAD_DATA;
-extern int (*real_fpu_kern_enter)(struct thread *td, struct fpu_kern_ctx *ctx, uint32_t flags) PAYLOAD_DATA;
-extern int (*real_fpu_kern_leave)(struct thread *td, struct fpu_kern_ctx *ctx) PAYLOAD_DATA;
-extern void (*real_Sha256Hmac)(uint8_t hash[0x20], const uint8_t* data, size_t data_size, const uint8_t* key, int key_size) PAYLOAD_DATA;
-extern int (*real_AesCbcCfb128Decrypt)(uint8_t* out, const uint8_t* in, size_t data_size, const uint8_t* key, int key_size, uint8_t* iv) PAYLOAD_DATA;
-extern int (*real_RsaesPkcs1v15Dec2048CRT)(struct rsa_buffer* out, struct rsa_buffer* in, struct rsa_key* key) PAYLOAD_DATA;
-extern int (*real_sceSblPfsKeymgrGenEKpfsForGDGPAC)(struct pfs_key_blob* key_blob) PAYLOAD_DATA;
-extern int (*real_sceSblPfsSetKey)(uint32_t* ekh, uint32_t* skh, uint8_t* key, uint8_t* iv, int type, int unused, uint8_t is_disc) PAYLOAD_DATA;
-extern int (*real_sceSblServiceCryptAsync)(struct ccp_req* request) PAYLOAD_DATA;
-extern int (*real_sceSblKeymgrSmCallfunc)(union keymgr_payload* payload) PAYLOAD_DATA;
+extern void* (*real_memcpy)(void* dst, const void* src, size_t len) PAYLOAD_BSS;
+extern void* (*real_memcmp)(const void *b1, const void *b2, size_t len) PAYLOAD_BSS;
+extern void* (*real_memset)(void *s, int c, size_t n) PAYLOAD_BSS;
+extern int (*real_sx_xlock)(struct sx *sx, int opts) PAYLOAD_BSS;
+extern int (*real_sx_xunlock)(struct sx *sx) PAYLOAD_BSS;
+extern int (*real_fpu_kern_enter)(struct thread *td, struct fpu_kern_ctx *ctx, uint32_t flags) PAYLOAD_BSS;
+extern int (*real_fpu_kern_leave)(struct thread *td, struct fpu_kern_ctx *ctx) PAYLOAD_BSS;
+extern void (*real_Sha256Hmac)(uint8_t hash[0x20], const uint8_t* data, size_t data_size, const uint8_t* key, int key_size) PAYLOAD_BSS;
+extern int (*real_AesCbcCfb128Decrypt)(uint8_t* out, const uint8_t* in, size_t data_size, const uint8_t* key, int key_size, uint8_t* iv) PAYLOAD_BSS;
+extern int (*real_RsaesPkcs1v15Dec2048CRT)(struct rsa_buffer* out, struct rsa_buffer* in, struct rsa_key* key) PAYLOAD_BSS;
+extern int (*real_sceSblPfsKeymgrGenEKpfsForGDGPAC)(struct pfs_key_blob* key_blob) PAYLOAD_BSS;
+extern int (*real_sceSblPfsSetKey)(uint32_t* ekh, uint32_t* skh, uint8_t* key, uint8_t* iv, int type, int unused, uint8_t is_disc) PAYLOAD_BSS;
+extern int (*real_sceSblServiceCryptAsync)(struct ccp_req* request) PAYLOAD_BSS;
+extern int (*real_sceSblKeymgrSmCallfunc)(union keymgr_payload* payload) PAYLOAD_BSS;
 
-extern struct sbl_map_list_entry** sbl_driver_mapped_pages PAYLOAD_DATA;
-extern struct sbl_key_rbtree_entry** sbl_keymgr_key_rbtree PAYLOAD_DATA;
-extern void* fpu_ctx PAYLOAD_DATA;
+extern struct sbl_map_list_entry** sbl_driver_mapped_pages PAYLOAD_BSS;
+extern struct sbl_key_rbtree_entry** sbl_keymgr_key_rbtree PAYLOAD_BSS;
+extern void* fpu_ctx PAYLOAD_BSS;
 
 extern int my_sceSblKeymgrSmCallfunc_npdrm_decrypt_isolated_rif(union keymgr_payload* payload) PAYLOAD_CODE;
 extern int my_sceSblPfsKeymgrGenEKpfsForGDGPAC_sceSblPfsKeymgrIoctl(struct pfs_key_blob* key_blob) PAYLOAD_CODE;
@@ -34,8 +34,8 @@ extern int my_sceSblPfsSetKey_pfs_sbl_init(uint32_t* ekh, uint32_t* skh, uint8_t
 extern int my_sceSblServiceCryptAsync_pfs_crypto(struct ccp_req* request) PAYLOAD_CODE;
 extern int my_sceSblKeymgrSmCallfunc_npdrm_decrypt_rif_new(union keymgr_payload* payload) PAYLOAD_CODE;
 
-extern struct fake_key_desc s_fake_keys[MAX_FAKE_KEYS] PAYLOAD_DATA;
-extern struct sx s_fake_keys_lock PAYLOAD_DATA;
+extern struct fake_key_desc s_fake_keys[MAX_FAKE_KEYS] PAYLOAD_BSS;
+extern struct sx s_fake_keys_lock PAYLOAD_BSS;
 
 static const uint8_t s_ypkg_p[0x80] PAYLOAD_RDATA =
 {

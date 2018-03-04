@@ -10,19 +10,19 @@
 
 #define PAGE_SIZE 0x4000
 
-extern void* (*real_malloc)(unsigned long size, void* type, int flags) PAYLOAD_DATA;
-extern void (*real_free)(void* addr, void* type) PAYLOAD_DATA;
-extern void* (*real_memcpy)(void* dst, const void* src, size_t len) PAYLOAD_DATA;
+extern void* (*real_malloc)(unsigned long size, void* type, int flags) PAYLOAD_BSS;
+extern void (*real_free)(void* addr, void* type) PAYLOAD_BSS;
+extern void* (*real_memcpy)(void* dst, const void* src, size_t len) PAYLOAD_BSS;
 
-extern void* M_TEMP PAYLOAD_DATA;
-extern struct sbl_map_list_entry** sbl_driver_mapped_pages PAYLOAD_DATA;
-extern uint8_t* mini_syscore_self_binary PAYLOAD_DATA;
+extern void* M_TEMP PAYLOAD_BSS;
+extern struct sbl_map_list_entry** sbl_driver_mapped_pages PAYLOAD_BSS;
+extern uint8_t* mini_syscore_self_binary PAYLOAD_BSS;
 
-extern int (*real_sceSblServiceMailbox)(unsigned long service_id, uint8_t request[SBL_MSG_SERVICE_MAILBOX_MAX_SIZE], void* response) PAYLOAD_DATA;
-extern int (*real_sceSblAuthMgrGetSelfInfo)(struct self_context* ctx, struct self_ex_info** info) PAYLOAD_DATA;
-extern void (*real_sceSblAuthMgrSmStart)(void**) PAYLOAD_DATA;
-extern int (*real_sceSblAuthMgrIsLoadable2)(struct self_context* ctx, struct self_auth_info* old_auth_info, int path_id, struct self_auth_info* new_auth_info) PAYLOAD_DATA;
-extern int (*real_sceSblAuthMgrVerifyHeader)(struct self_context* ctx) PAYLOAD_DATA;
+extern int (*real_sceSblServiceMailbox)(unsigned long service_id, uint8_t request[SBL_MSG_SERVICE_MAILBOX_MAX_SIZE], void* response) PAYLOAD_BSS;
+extern int (*real_sceSblAuthMgrGetSelfInfo)(struct self_context* ctx, struct self_ex_info** info) PAYLOAD_BSS;
+extern void (*real_sceSblAuthMgrSmStart)(void**) PAYLOAD_BSS;
+extern int (*real_sceSblAuthMgrIsLoadable2)(struct self_context* ctx, struct self_auth_info* old_auth_info, int path_id, struct self_auth_info* new_auth_info) PAYLOAD_BSS;
+extern int (*real_sceSblAuthMgrVerifyHeader)(struct self_context* ctx) PAYLOAD_BSS;
 
 static const uint8_t s_auth_info_for_exec[] PAYLOAD_RDATA =
 {
@@ -319,7 +319,7 @@ PAYLOAD_CODE int my_sceSblAuthMgrSmLoadSelfSegment__sceSblServiceMailbox(unsigne
   /* getting a stack frame of a parent function */
   uint8_t* frame = (uint8_t*)__builtin_frame_address(1);
   /* finding a pointer to a context's structure */
-  struct self_context* ctx = *(struct self_context**)(frame - 0x110);
+  struct self_context* ctx = *(struct self_context**)(frame - 0x100);
   int is_unsigned = ctx && is_fake_self(ctx);
   if (is_unsigned)
   {
@@ -332,7 +332,7 @@ PAYLOAD_CODE int my_sceSblAuthMgrSmLoadSelfSegment__sceSblServiceMailbox(unsigne
 PAYLOAD_CODE int my_sceSblAuthMgrSmLoadSelfBlock__sceSblServiceMailbox(unsigned long service_id, uint8_t* request, void* response)
 {
   struct self_context* ctx;
-  register struct self_context* ctx_reg __asm__("r12");
+  register struct self_context* ctx_reg __asm__("r14");
   vm_offset_t segment_data_gpu_va = *(unsigned long*)(request + 0x08);
   vm_offset_t cur_data_gpu_va = *(unsigned long*)(request + 0x50);
   vm_offset_t cur_data2_gpu_va = *(unsigned long*)(request + 0x58);

@@ -1,7 +1,7 @@
 #ifndef __DEFINES
 #define __DEFINES
 
-#define VERSION "1.3"
+#define VERSION "1.4"
 
 //#define DEBUG_SOCKET
 
@@ -61,24 +61,16 @@ struct real_info
   const size_t payload_offset;
 };
 
-struct cave_info
-{
-  const size_t kernel_call_offset;
-  const size_t kernel_ptr_offset;
-  const size_t payload_offset;
-};
-
 struct disp_info
 {
   const size_t call_offset;
-  const size_t cave_offset;
+  const size_t payload_offset;
 };
 
 struct payload_header
 {
   uint64_t signature;
   size_t real_info_offset;
-  size_t cave_info_offset;
   size_t disp_info_offset;
   size_t entrypoint_offset;
 };
@@ -115,6 +107,35 @@ static inline __attribute__((always_inline)) uint64_t readCr0(void)
 static inline __attribute__((always_inline)) void writeCr0(uint64_t cr0)
 {
   __asm__ volatile("movq %%cr0, %0" : : "r" (cr0) : "memory");
+}
+
+static inline __attribute__((always_inline)) void disable_interrupts(void)
+{
+    asm volatile("cli");
+}
+
+static inline __attribute__((always_inline)) void enable_interrupts(void)
+{
+    asm volatile("sti");
+}
+
+static inline __attribute__((always_inline)) uint64_t read_flags(void)
+{
+    uint64_t flags;
+    asm volatile("pushf; pop %0;" : "=r" (flags));
+    return flags;
+}
+
+static inline __attribute__((always_inline)) uint64_t intr_disable(void)
+{
+    uint64_t flags = read_flags();
+    disable_interrupts();
+    return flags;
+}
+
+static inline __attribute__((always_inline)) void intr_restore(uint64_t flags)
+{
+    asm volatile("push %0; popf;" : : "rm" (flags) : "memory");
 }
 
 #endif

@@ -95,7 +95,7 @@ int get_code_info(int pid, uint64_t* paddress, uint64_t* psize, uint64_t known_s
     uint64_t code_size = end_addr - start_addr;
     uint32_t prot = *(uint32_t*)(&entry[0x38]);
 
-    printfsocket("%d %llx %llx (%llu) %x\n", type, start_addr, end_addr, code_size, prot);
+    printfsocket("%d 0x%llx 0x%llx (0x%llx) %x\n", type, start_addr, end_addr, code_size, prot);
 
     if (type == 255 && prot == 5 && code_size == known_size)
     {
@@ -178,17 +178,17 @@ int do_patch()
   const patch_info shellcore_patches[] =
   {
     // call sceKernelIsGenuineCEX
-    { NULL, 0x11A0DB, "\x31\xC0\x90\x90\x90", 5 },
-    { NULL, 0x66EA3B, "\x31\xC0\x90\x90\x90", 5 },
-    { NULL, 0x7F554B, "\x31\xC0\x90\x90\x90", 5 },
+    { NULL, 0x1486BB, "\x31\xC0\x90\x90\x90", 5 },
+    { NULL, 0x6E523B, "\x31\xC0\x90\x90\x90", 5 },
+    { NULL, 0x852C6B, "\x31\xC0\x90\x90\x90", 5 },
              
     // call nidf_libSceDipsw_0xD21CE9E2F639A83C
-    { NULL, 0x11A107, "\x31\xC0\x90\x90\x90", 5 },
-    { NULL, 0x66EA67, "\x31\xC0\x90\x90\x90", 5 },
-    { NULL, 0x7F5577, "\x31\xC0\x90\x90\x90", 5 },
+    { NULL, 0x1486E7, "\x31\xC0\x90\x90\x90", 5 },
+    { NULL, 0x6E5267, "\x31\xC0\x90\x90\x90", 5 },
+    { NULL, 0x852C97, "\x31\xC0\x90\x90\x90", 5 },
 
     // debug pkg free string
-    { NULL, 0xC980EE, "free\0", 5 },
+    { NULL, 0xD40F28, "free\0", 5 },
 
     { NULL, 0, NULL, 0 },
   };
@@ -210,7 +210,7 @@ int do_patch()
   }
 
   printfsocket("Patching SceShellCore...\n");
-  result = apply_patches(shell_pid, 0xF18000, shellcore_patches);
+  result = apply_patches(shell_pid, 0xFEC000, shellcore_patches);
 
   return result;
 }

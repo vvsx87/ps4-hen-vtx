@@ -4,7 +4,7 @@ pushd tool
 make clean
 popd
 
-pushd payload
+pushd kpayload
 make clean
 popd
 

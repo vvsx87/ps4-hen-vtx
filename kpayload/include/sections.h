@@ -6,5 +6,6 @@
 #define PAYLOAD_CODE __attribute__((section(".payload_code")))
 #define PAYLOAD_DATA __attribute__((section(".payload_data")))
 #define PAYLOAD_RDATA __attribute__((section(".payload_rdata")))
+#define PAYLOAD_BSS __attribute__((section(".payload_bss")))
 
 #endif
