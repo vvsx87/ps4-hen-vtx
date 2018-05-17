@@ -188,9 +188,17 @@ int kernel_payload(struct thread *td, struct kernel_payload_args* args)
   *(char *)(kernel_base + 0x1B6D0AA) |= 1;
   *(char *)(kernel_base + 0x1B6D0C8) |= 1;	
 
-  // debug menu full patches
+  // debug menu error patches
   *(uint32_t *)(kernel_base + 0x4D70F7) = 0;
   *(uint32_t *)(kernel_base + 0x4D7F81) = 0;
+
+  // target_id patches
+  *(uint16_t *)(kernel_base + 0x1AF82C4) = 0x8101;
+  *(uint16_t *)(kernel_base + 0X1AF85A4) = 0x8101;
+  *(uint16_t *)(kernel_base + 0x1B6D08C) = 0x8101;
+
+  // spoofer
+  *(uint32_t *)(kernel_base + 0x144B600) = 0x5050001;
 
   // flatz disable RSA signature check for PFS
   *(uint32_t *)(kernel_base + 0x69F4E0) = 0x90C3C031;
