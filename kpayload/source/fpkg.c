@@ -3,39 +3,41 @@
 
 #include "sections.h"
 #include "sparse.h"
+#include "offsets.h"
 #include "freebsd_helper.h"
 #include "sbl_helper.h"
 #include "pfs_helper.h"
 #include "rif_helper.h"
 #include "ccp_helper.h"
+#include "amd_helper.h"
 
-extern void* (*real_memcpy)(void* dst, const void* src, size_t len) PAYLOAD_BSS;
-extern void* (*real_memcmp)(const void *b1, const void *b2, size_t len) PAYLOAD_BSS;
-extern void* (*real_memset)(void *s, int c, size_t n) PAYLOAD_BSS;
-extern int (*real_sx_xlock)(struct sx *sx, int opts) PAYLOAD_BSS;
-extern int (*real_sx_xunlock)(struct sx *sx) PAYLOAD_BSS;
-extern int (*real_fpu_kern_enter)(struct thread *td, struct fpu_kern_ctx *ctx, uint32_t flags) PAYLOAD_BSS;
-extern int (*real_fpu_kern_leave)(struct thread *td, struct fpu_kern_ctx *ctx) PAYLOAD_BSS;
-extern void (*real_Sha256Hmac)(uint8_t hash[0x20], const uint8_t* data, size_t data_size, const uint8_t* key, int key_size) PAYLOAD_BSS;
-extern int (*real_AesCbcCfb128Decrypt)(uint8_t* out, const uint8_t* in, size_t data_size, const uint8_t* key, int key_size, uint8_t* iv) PAYLOAD_BSS;
-extern int (*real_RsaesPkcs1v15Dec2048CRT)(struct rsa_buffer* out, struct rsa_buffer* in, struct rsa_key* key) PAYLOAD_BSS;
-extern int (*real_sceSblPfsKeymgrGenEKpfsForGDGPAC)(struct pfs_key_blob* key_blob) PAYLOAD_BSS;
-extern int (*real_sceSblPfsSetKey)(uint32_t* ekh, uint32_t* skh, uint8_t* key, uint8_t* iv, int type, int unused, uint8_t is_disc) PAYLOAD_BSS;
-extern int (*real_sceSblServiceCryptAsync)(struct ccp_req* request) PAYLOAD_BSS;
-extern int (*real_sceSblKeymgrSmCallfunc)(union keymgr_payload* payload) PAYLOAD_BSS;
+extern void* (*memcpy)(void* dst, const void* src, size_t len) PAYLOAD_BSS;
+extern void* (*memset)(void *s, int c, size_t n) PAYLOAD_BSS;
+extern int (*sx_xlock)(struct sx *sx, int opts) PAYLOAD_BSS;
+extern int (*sx_xunlock)(struct sx *sx) PAYLOAD_BSS;
+extern int (*fpu_kern_enter)(struct thread *td, struct fpu_kern_ctx *ctx, uint32_t flags) PAYLOAD_BSS;
+extern int (*fpu_kern_leave)(struct thread *td, struct fpu_kern_ctx *ctx) PAYLOAD_BSS;
 
-extern struct sbl_map_list_entry** sbl_driver_mapped_pages PAYLOAD_BSS;
-extern struct sbl_key_rbtree_entry** sbl_keymgr_key_rbtree PAYLOAD_BSS;
 extern void* fpu_ctx PAYLOAD_BSS;
+extern struct sx* sbl_pfs_sx PAYLOAD_BSS;
+extern struct sbl_map_list_entry** sbl_driver_mapped_pages PAYLOAD_BSS;
+
+extern int (*sceSblPfsKeymgrGenKeys)(union pfs_key_blob* key_blob) PAYLOAD_BSS;
+extern int (*sceSblPfsSetKeys)(uint32_t* ekh, uint32_t* skh, uint8_t* eekpfs, struct ekc* eekc, unsigned int pubkey_ver, unsigned int key_ver, struct pfs_header* hdr, size_t hdr_size, unsigned int type, unsigned int finalized, unsigned int is_disc) PAYLOAD_BSS;
+extern int (*sceSblKeymgrClearKey)(uint32_t kh) PAYLOAD_BSS;
+extern int (*sceSblKeymgrSetKeyForPfs)(union sbl_key_desc* key, unsigned int* handle) PAYLOAD_BSS;
+extern int (*sceSblKeymgrSmCallfunc)(union keymgr_payload* payload) PAYLOAD_BSS;
+extern int (*sceSblDriverSendMsg)(struct sbl_msg* msg, size_t size) PAYLOAD_BSS;
+
+extern int (*RsaesPkcs1v15Dec2048CRT)(struct rsa_buffer* out, struct rsa_buffer* in, struct rsa_key* key) PAYLOAD_BSS;
+extern int (*AesCbcCfb128Encrypt)(uint8_t* out, const uint8_t* in, size_t data_size, const uint8_t* key, int key_size, uint8_t* iv) PAYLOAD_BSS;
+extern int (*AesCbcCfb128Decrypt)(uint8_t* out, const uint8_t* in, size_t data_size, const uint8_t* key, int key_size, uint8_t* iv) PAYLOAD_BSS;
+extern void (*Sha256Hmac)(uint8_t hash[0x20], const uint8_t* data, size_t data_size, const uint8_t* key, int key_size) PAYLOAD_BSS;
 
 extern int my_sceSblKeymgrSmCallfunc_npdrm_decrypt_isolated_rif(union keymgr_payload* payload) PAYLOAD_CODE;
-extern int my_sceSblPfsKeymgrGenEKpfsForGDGPAC_sceSblPfsKeymgrIoctl(struct pfs_key_blob* key_blob) PAYLOAD_CODE;
-extern int my_sceSblPfsSetKey_pfs_sbl_init(uint32_t* ekh, uint32_t* skh, uint8_t* key, uint8_t* iv, int type, int unused, uint8_t is_disc) PAYLOAD_CODE;
-extern int my_sceSblServiceCryptAsync_pfs_crypto(struct ccp_req* request) PAYLOAD_CODE;
 extern int my_sceSblKeymgrSmCallfunc_npdrm_decrypt_rif_new(union keymgr_payload* payload) PAYLOAD_CODE;
-
-extern struct fake_key_desc s_fake_keys[MAX_FAKE_KEYS] PAYLOAD_BSS;
-extern struct sx s_fake_keys_lock PAYLOAD_BSS;
+extern int my_sceSblKeymgrSetKeyStorage__sceSblDriverSendMsg(struct sbl_msg* msg, size_t size) PAYLOAD_CODE;
+extern int my_mountpfs__sceSblPfsSetKeys(uint32_t* ekh, uint32_t* skh, uint8_t* eekpfs, struct ekc* eekc, unsigned int pubkey_ver, unsigned int key_ver, struct pfs_header* hdr, size_t hdr_size, unsigned int type, unsigned int finalized, unsigned int is_disc) PAYLOAD_CODE;
 
 static const uint8_t s_ypkg_p[0x80] PAYLOAD_RDATA =
 {
@@ -108,86 +110,23 @@ static const uint8_t s_fake_key_seed[0x10] PAYLOAD_RDATA =
   0x46, 0x41, 0x4B, 0x45, 0x46, 0x41, 0x4B, 0x45, 0x46, 0x41, 0x4B, 0x45, 0x46, 0x41, 0x4B, 0x45,
 };
 
-PAYLOAD_CODE static inline struct fake_key_desc* get_free_fake_key_slot(void)
-{
-  struct fake_key_desc* slot = NULL;
-  size_t i;
-
-  real_sx_xlock(&s_fake_keys_lock, 0);
-  {
-    for (i = 0; i < _countof(s_fake_keys); ++i)
-    {
-      if (!s_fake_keys[i].occupied)
-      {
-        s_fake_keys[i].occupied = 1;
-        slot = s_fake_keys + i;
-        break;
-      }
-    }
-  }
-  real_sx_xunlock(&s_fake_keys_lock);
-
-  return slot;
-}
-
-PAYLOAD_CODE static inline struct sbl_key_rbtree_entry* sceSblKeymgrGetKey(unsigned int handle)
-{
-  struct sbl_key_rbtree_entry* entry = *sbl_keymgr_key_rbtree;
-
-  while (entry)
-  {
-    if (entry->handle < handle)
-      entry = entry->right;
-    else if (entry->handle > handle)
-      entry = entry->left;
-    else if (entry->handle == handle)
-      return entry;
-  }
-
-  return NULL;
-}
-
-PAYLOAD_CODE static inline struct fake_key_desc* is_fake_pfs_key(uint8_t* key)
-{
-  struct fake_key_desc* slot = NULL;
-  size_t i;
-
-  real_sx_xlock(&s_fake_keys_lock, 0);
-  {
-    for (i = 0; i < _countof(s_fake_keys); ++i)
-    {
-      if (!s_fake_keys[i].occupied)
-        continue;
-
-      if (real_memcmp(s_fake_keys[i].key, key, sizeof(s_fake_keys[i].key)) == 0)
-      {
-        slot = s_fake_keys + i;
-        break;
-      }
-    }
-  }
-  real_sx_xunlock(&s_fake_keys_lock);
-
-  return slot;
-}
-
 // a common function to generate a final key for PFS
 PAYLOAD_CODE static inline void pfs_gen_crypto_key(uint8_t* ekpfs, uint8_t seed[PFS_SEED_SIZE], unsigned int index, uint8_t key[PFS_FINAL_KEY_SIZE])
 {
   struct thread* td = curthread();
   struct fake_key_d d;
 
-  real_memset(&d, 0, sizeof(d));
+  memset(&d, 0, sizeof(d));
   {
     d.index = index;
-    real_memcpy(d.seed, seed, PFS_SEED_SIZE);
+    memcpy(d.seed, seed, PFS_SEED_SIZE);
   }
 
-  real_fpu_kern_enter(td, fpu_ctx, 0);
+  fpu_kern_enter(td, fpu_ctx, 0);
   {
-    real_Sha256Hmac(key, (uint8_t *)&d, sizeof(d), ekpfs, EKPFS_SIZE);
+    Sha256Hmac(key, (uint8_t *)&d, sizeof(d), ekpfs, EKPFS_SIZE);
   }
-  real_fpu_kern_leave(td, fpu_ctx);
+  fpu_kern_leave(td, fpu_ctx);
 }
 
 // an encryption key generator based on EKPFS and PFS header seed
@@ -207,14 +146,14 @@ PAYLOAD_CODE static inline int npdrm_decrypt_debug_rif(unsigned int type, uint8_
   struct thread* td = curthread();
   int ret;
 
-  real_fpu_kern_enter(td, fpu_ctx, 0);
+  fpu_kern_enter(td, fpu_ctx, 0);
   {
     // decrypt fake rif manually using a key from publishing tools 
-    ret = real_AesCbcCfb128Decrypt(data + RIF_DIGEST_SIZE, data + RIF_DIGEST_SIZE, RIF_DATA_SIZE, rif_debug_key, sizeof(rif_debug_key) * 8, data);
+    ret = AesCbcCfb128Decrypt(data + RIF_DIGEST_SIZE, data + RIF_DIGEST_SIZE, RIF_DATA_SIZE, rif_debug_key, sizeof(rif_debug_key) * 8, data);
     if (ret)
       ret = SCE_SBL_ERROR_NPDRM_ENOTSUP;
   }
-  real_fpu_kern_leave(td, fpu_ctx);
+  fpu_kern_leave(td, fpu_ctx);
 
   return ret;
 }
@@ -252,72 +191,151 @@ PAYLOAD_CODE static inline vm_offset_t sceSblDriverGpuVaToCpuVa(vm_offset_t gpu_
   return entry->cpu_va;
 }
 
-PAYLOAD_CODE static inline int ccp_msg_populate_key(unsigned int key_handle, uint8_t* key, int reverse)
+PAYLOAD_CODE int my_sceSblKeymgrSetKeyStorage__sceSblDriverSendMsg(struct sbl_msg* msg, size_t size)
 {
-  struct sbl_key_rbtree_entry* key_entry;
-  uint8_t* in_key;
-  int i;
-  int status = 0;
+  union ccp_op* op;
+  unsigned int cmd_mask;
+  size_t key_len;
+  size_t i;
+  int ret;
 
-  // searching for a key entry 
-  key_entry = sceSblKeymgrGetKey(key_handle);
+  if (msg->hdr.cmd != SBL_MSG_CCP)
+    goto done;
+  
+  op = &msg->service.ccp.op;
+  if (CCP_OP(op->common.cmd) != CCP_OP_AES)
+    goto done;
 
-  if (key_entry)
-  {
-    // we have found one, now checking if it's our key 
-    if (real_memcmp(key_entry->desc.pfs.seed, s_fake_key_seed, sizeof(key_entry->desc.pfs.seed)) == 0)
-    {
-      // currently we have a crypto request that use a key slot which should be already in CCP, but because we
-      // did everything manually, we don't have this key slot, so we need to remove using of key slot and place
-      // a plain key here 
-      in_key = key_entry->desc.pfs.key;
-      if (reverse)
-      { // reverse bytes of a key if it's needed 
-        for (i = 0; i < 0x20; ++i)
-          key[0x20 - i - 1] = in_key[i];
-      } 
-      else 
-      { // copy a key as is 
-        real_memcpy(key, in_key, 0x20);
-      }
-      status = 1;
-    }
-  }
-  return status;
+  cmd_mask = CCP_USE_KEY_FROM_SLOT | CCP_GENERATE_KEY_AT_SLOT;
+  if ((op->aes.cmd & cmd_mask) != cmd_mask || (op->aes.key_index != PFS_FAKE_OBF_KEY_ID))
+    goto done;
+
+  op->aes.cmd &= ~CCP_USE_KEY_FROM_SLOT;
+
+  key_len = 16;
+
+  /* reverse key bytes */
+  for (i = 0; i < key_len; ++i)
+    op->aes.key[i] = s_fake_key_seed[key_len - i - 1];
+
+done:
+
+  ret = sceSblDriverSendMsg(msg, size);
+
+  return ret;
 }
 
-PAYLOAD_CODE static inline int ccp_msg_populate_key_if_needed(struct ccp_msg* msg)
+PAYLOAD_CODE int my_mountpfs__sceSblPfsSetKeys(uint32_t* ekh, uint32_t* skh, uint8_t* eekpfs, struct ekc* eekc, unsigned int pubkey_ver, unsigned int key_ver, struct pfs_header* hdr, size_t hdr_size, unsigned int type, unsigned int finalized, unsigned int is_disc)
 {
-  unsigned int cmd = msg->op.common.cmd; 
-  unsigned int type = CCP_OP(cmd);
-  uint8_t* buf;
-  int status = 0;
+  struct thread* td;
+  struct rsa_buffer in_data;
+  struct rsa_buffer out_data;
+  struct rsa_key key;
+  uint8_t ekpfs[EKPFS_SIZE];
+  uint8_t iv[16];
+  union sbl_key_desc enc_key_desc;
+  union sbl_key_desc sign_key_desc;
+  int orig_ret, ret;
 
-  // skip messages that use plain keys and key slots 
-  if (!(cmd & CCP_USE_KEY_HANDLE))
-    goto skip;
+  ret = orig_ret = sceSblPfsSetKeys(ekh, skh, eekpfs, eekc, pubkey_ver, key_ver, hdr, hdr_size, type, finalized, is_disc);
 
-  buf = (uint8_t*)&msg->op;
+  if (ret) {
+    if (!finalized) {
+      memset(&in_data, 0, sizeof(in_data));
+      in_data.ptr = eekpfs;
+      in_data.size = EEKPFS_SIZE;
 
-  // we only need to handle xts/hmac crypto operations 
-  switch (type)
-  {
-    case CCP_OP_XTS:
-      status = ccp_msg_populate_key(*(uint32_t*)(buf + 0x28), buf + 0x28, 1); // xts key have a reversed byte order 
-      break;
-    case CCP_OP_HMAC:
-      status = ccp_msg_populate_key(*(uint32_t*)(buf + 0x40), buf + 0x40, 0); // hmac key have a normal byte order 
-      break;
-    default:
-      goto skip;
+      memset(&out_data, 0, sizeof(out_data));
+      out_data.ptr = ekpfs;
+      out_data.size = EKPFS_SIZE;
+
+      memset(&key, 0, sizeof(key));
+      key.p = (uint8_t*)s_ypkg_p;
+      key.q = (uint8_t*)s_ypkg_q;
+      key.dmp1 = (uint8_t*)s_ypkg_dmp1;
+      key.dmq1 = (uint8_t*)s_ypkg_dmq1;
+      key.iqmp = (uint8_t*)s_ypkg_iqmp;
+
+      td = curthread();
+
+      fpu_kern_enter(td, fpu_ctx, 0);
+      {
+        ret = RsaesPkcs1v15Dec2048CRT(&out_data, &in_data, &key);
+      }
+      fpu_kern_leave(td, fpu_ctx);
+
+      if (ret) {
+        ret = orig_ret;
+        goto err;
+      }
+
+      sx_xlock(sbl_pfs_sx, 0);
+      {
+        memset(&enc_key_desc, 0, sizeof(enc_key_desc));
+        {
+          enc_key_desc.pfs.obf_key_id = PFS_FAKE_OBF_KEY_ID;
+          enc_key_desc.pfs.key_size = sizeof(enc_key_desc.pfs.escrowed_key);
+
+          pfs_generate_enc_key(ekpfs, hdr->crypt_seed, enc_key_desc.pfs.escrowed_key);
+
+          fpu_kern_enter(td, fpu_ctx, 0);
+          {
+            memset(iv, 0, sizeof(iv));
+            ret = AesCbcCfb128Encrypt(enc_key_desc.pfs.escrowed_key, enc_key_desc.pfs.escrowed_key, sizeof(enc_key_desc.pfs.escrowed_key), s_fake_key_seed, sizeof(s_fake_key_seed) * 8, iv);
+          }
+          fpu_kern_leave(td, fpu_ctx);
+        }
+        if (ret) {
+          sx_xunlock(sbl_pfs_sx);
+          ret = orig_ret;
+          goto err;
+        }
+
+        memset(&sign_key_desc, 0, sizeof(sign_key_desc));
+        {
+          sign_key_desc.pfs.obf_key_id = PFS_FAKE_OBF_KEY_ID;
+          sign_key_desc.pfs.key_size = sizeof(sign_key_desc.pfs.escrowed_key);
+
+          pfs_generate_sign_key(ekpfs, hdr->crypt_seed, sign_key_desc.pfs.escrowed_key);
+
+          fpu_kern_enter(td, fpu_ctx, 0);
+          {
+            memset(iv, 0, sizeof(iv));
+            ret = AesCbcCfb128Encrypt(sign_key_desc.pfs.escrowed_key, sign_key_desc.pfs.escrowed_key, sizeof(sign_key_desc.pfs.escrowed_key), s_fake_key_seed, sizeof(s_fake_key_seed) * 8, iv);
+          }
+          fpu_kern_leave(td, fpu_ctx);
+        }
+        if (ret) {
+          sx_xunlock(sbl_pfs_sx);
+          ret = orig_ret;
+          goto err;
+        }
+
+        ret = sceSblKeymgrSetKeyForPfs(&enc_key_desc, ekh);
+        if (ret) {
+          if (*ekh != -1)
+            sceSblKeymgrClearKey(*ekh);
+          sx_xunlock(sbl_pfs_sx);
+          ret = orig_ret;
+          goto err;
+        }
+
+        ret = sceSblKeymgrSetKeyForPfs(&sign_key_desc, skh);
+        if (ret) {
+          if (*skh != -1)
+            sceSblKeymgrClearKey(*skh);
+          sx_xunlock(sbl_pfs_sx);
+          ret = orig_ret;
+          goto err;
+        }
+      }
+      sx_xunlock(sbl_pfs_sx);
+
+      ret = 0;
+    }
   }
-
-  // if key was successfully populated, then remove the flag which tells CCP to use a key slot 
-  if (status)
-    msg->op.common.cmd &= ~CCP_USE_KEY_HANDLE;
-
-skip:
-  return status;
+err:
+  return ret;
 }
 
 PAYLOAD_CODE int my_sceSblKeymgrSmCallfunc_npdrm_decrypt_isolated_rif(union keymgr_payload* payload)
@@ -327,7 +345,7 @@ PAYLOAD_CODE int my_sceSblKeymgrSmCallfunc_npdrm_decrypt_isolated_rif(union keym
   int ret;
 
   // try to decrypt rif normally 
-  ret = real_sceSblKeymgrSmCallfunc(payload);
+  ret = sceSblKeymgrSmCallfunc(payload);
 
   // and if it fails then we check if it's fake rif and try to decrypt it by ourselves 
   if ((ret != 0 || payload->status != 0) && request)
@@ -342,117 +360,6 @@ PAYLOAD_CODE int my_sceSblKeymgrSmCallfunc_npdrm_decrypt_isolated_rif(union keym
   return ret;
 }
 
-PAYLOAD_CODE int my_sceSblPfsKeymgrGenEKpfsForGDGPAC_sceSblPfsKeymgrIoctl(struct pfs_key_blob* blob)
-{
-  struct thread* td = curthread();
-
-  struct rsa_buffer in_data;
-  struct rsa_buffer out_data;
-  struct rsa_key key;
-  uint8_t dec_data[EEKPFS_SIZE];
-  struct fake_key_desc* fake_key_slot;
-  int ret;
-
-  // try to decrypt EEKPFS normally 
-  ret = real_sceSblPfsKeymgrGenEKpfsForGDGPAC(blob);
-
-  if (ret)
-  {
-    // if this key is for debug/fake content, we could try to decrypt it manually 
-    if (!blob->finalized)
-    {
-      real_memset(&in_data, 0, sizeof(in_data));
-      {
-        in_data.ptr = blob->eekpfs;
-        in_data.size = sizeof(blob->eekpfs);
-      }
-
-      real_memset(&out_data, 0, sizeof(out_data));
-      {
-        out_data.ptr = dec_data;
-        out_data.size = sizeof(dec_data);
-      }
-
-      real_memset(&key, 0, sizeof(key));
-      {
-        // here we feed a custom key to the algorithm 
-        key.p = (uint8_t*)s_ypkg_p;
-        key.q = (uint8_t*)s_ypkg_q;
-        key.dmp1 = (uint8_t*)s_ypkg_dmp1;
-        key.dmq1 = (uint8_t*)s_ypkg_dmq1;
-        key.iqmp = (uint8_t*)s_ypkg_iqmp;
-      }
-
-      real_fpu_kern_enter(td, fpu_ctx, 0);
-      {
-        ret = real_RsaesPkcs1v15Dec2048CRT(&out_data, &in_data, &key);
-      }
-      real_fpu_kern_leave(td, fpu_ctx);
-
-      if (ret == 0)
-      { // got EKPFS key? 
-        real_memcpy(blob->ekpfs, dec_data, sizeof(blob->ekpfs));
-
-        // add it to our key list 
-        fake_key_slot = get_free_fake_key_slot();
-        if (fake_key_slot)
-          real_memcpy(fake_key_slot->key, blob->ekpfs, sizeof(fake_key_slot->key));
-      }
-    }
-  }
-  return ret;
-}
-
-PAYLOAD_CODE int my_sceSblPfsSetKey_pfs_sbl_init(unsigned int* ekh, unsigned int* skh, uint8_t* key, uint8_t* iv, int mode, int unused, uint8_t disc_flag)
-{
-  struct sbl_key_rbtree_entry* key_entry;
-  int is_fake_key;
-  int ret;
-
-  ret = real_sceSblPfsSetKey(ekh, skh, key, iv, mode, unused, disc_flag);
-
-  // check if it's a key that we have decrypted manually 
-  is_fake_key = is_fake_pfs_key(key) != NULL;
-
-  key_entry = sceSblKeymgrGetKey(*ekh); // find a corresponding key entry 
-  if (key_entry)
-  {
-    if (is_fake_key)
-    {
-      // generate an encryption key 
-      pfs_generate_enc_key(key, iv, key_entry->desc.pfs.key);
-      real_memcpy(key_entry->desc.pfs.seed, s_fake_key_seed, sizeof(s_fake_key_seed));
-    }
-  }
-  key_entry = sceSblKeymgrGetKey(*skh); // find a corresponding key entry 
-  if (key_entry)
-  {
-    if (is_fake_key)
-    {
-      // generate a signing key
-      pfs_generate_sign_key(key, iv, key_entry->desc.pfs.key);
-      real_memcpy(key_entry->desc.pfs.seed, s_fake_key_seed, sizeof(s_fake_key_seed));
-    }
-  }
-  return ret;
-}
-
-PAYLOAD_CODE int my_sceSblServiceCryptAsync_pfs_crypto(struct ccp_req* request)
-{
-  struct ccp_msg* msg;
-  int ret;
-
-  TAILQ_FOREACH(msg, &request->msgs, next){
-    // handle each message in crypto request 
-    ccp_msg_populate_key_if_needed(msg);
-  }
-
-  // run a crypto function normally 
-  ret = real_sceSblServiceCryptAsync(request);
-
-  return ret;
-}
-
 PAYLOAD_CODE int my_sceSblKeymgrSmCallfunc_npdrm_decrypt_rif_new(union keymgr_payload* payload)
 {
   uint64_t buf_gpu_va = payload->data;
@@ -463,7 +370,7 @@ PAYLOAD_CODE int my_sceSblKeymgrSmCallfunc_npdrm_decrypt_rif_new(union keymgr_pa
   int orig_ret, ret;
 
   // try to decrypt rif normally
-  ret = orig_ret = real_sceSblKeymgrSmCallfunc(payload);
+  ret = orig_ret = sceSblKeymgrSmCallfunc(payload);
 
   // and if it fails then we check if it's fake rif and try to decrypt it by ourselves
   if ((ret != 0 || payload->status != 0) && request)
@@ -484,9 +391,9 @@ PAYLOAD_CODE int my_sceSblKeymgrSmCallfunc_npdrm_decrypt_rif_new(union keymgr_pa
 
     /* XXX: sorry, i'm lazy to refactor this crappy code :D basically, we're copying decrypted data to proper place,
        consult with kernel code if offsets needs to be changed */
-    real_memcpy(response->decrypt_entire_rif.raw, request->decrypt_entire_rif.rif.digest, sizeof(request->decrypt_entire_rif.rif.digest) + sizeof(request->decrypt_entire_rif.rif.data));
+    memcpy(response->decrypt_entire_rif.raw, request->decrypt_entire_rif.rif.digest, sizeof(request->decrypt_entire_rif.rif.digest) + sizeof(request->decrypt_entire_rif.rif.data));
 
-    real_memset(response->decrypt_entire_rif.raw + 
+    memset(response->decrypt_entire_rif.raw + 
                 sizeof(request->decrypt_entire_rif.rif.digest) +
                 sizeof(request->decrypt_entire_rif.rif.data), 
                 0,
@@ -500,4 +407,24 @@ PAYLOAD_CODE int my_sceSblKeymgrSmCallfunc_npdrm_decrypt_rif_new(union keymgr_pa
 
 err:
   return ret;
+}
+
+PAYLOAD_CODE void install_fpkg_hooks()
+{
+  uint64_t flags, cr0;
+  uint64_t kernbase = getkernbase();
+
+  cr0 = readCr0();
+  writeCr0(cr0 & ~X86_CR0_WP);
+
+  flags = intr_disable();
+ 
+  KCALL_REL32(kernbase, sceSblKeymgrSmCallfunc_npdrm_decrypt_isolated_rif_hook, (uint64_t)my_sceSblKeymgrSmCallfunc_npdrm_decrypt_isolated_rif);
+  KCALL_REL32(kernbase, sceSblKeymgrSmCallfunc_npdrm_decrypt_rif_new_hook, (uint64_t)my_sceSblKeymgrSmCallfunc_npdrm_decrypt_rif_new);
+  KCALL_REL32(kernbase, sceSblKeymgrSetKeyStorage__sceSblDriverSendMsg_hook, (uint64_t)my_sceSblKeymgrSetKeyStorage__sceSblDriverSendMsg);
+  KCALL_REL32(kernbase, mountpfs__sceSblPfsSetKeys_hook1, (uint64_t)my_mountpfs__sceSblPfsSetKeys);
+  KCALL_REL32(kernbase, mountpfs__sceSblPfsSetKeys_hook2, (uint64_t)my_mountpfs__sceSblPfsSetKeys);
+
+  intr_restore(flags);
+  writeCr0(cr0);
 }
