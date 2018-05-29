@@ -13,6 +13,7 @@
 #define allproc_addr                    0x2382FF8
 
 // common
+#define strlen_addr                     0x3B71A0
 #define malloc_addr                     0x10E250
 #define free_addr                       0x10E460
 #define memcpy_addr                     0x1EA530
