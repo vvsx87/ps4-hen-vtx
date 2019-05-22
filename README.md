@@ -1,4 +1,4 @@
-# PS4HEN v2.0
+# PS4HEN v2.1
 
 ## Features
 - Homebrew Enabler
@@ -9,6 +9,9 @@
 - VR Support
 - Remote Package Install
 - Rest Mode Support
+ 
+## Fixes
+- Black Screen Fix on Rest Mode
 
 ## Contributors
 Massive credits to the following:
@@ -20,8 +23,13 @@ Massive credits to the following:
 - [Vortex](https://github.com/xvortex)
 - [zecoxao](https://twitter.com/notzecoxao)
 - [SiSTRo](https://github.com/SiSTR0)
+- [SocraticBliss](https://twitter.com/SocraticBliss)
+- [ChendoChap](https://github.com/ChendoChap)
 - Anonymous
 
 ## Testers
 - [SCORPION](https://twitter.com/SCORPION1399)
-- [SocraticBliss](https://mobile.twitter.com/SocraticBliss)
+- [KiiWii](https://twitter.com/defaultdnb)
+- [Leeful74](https://twitter.com/leeful74b)
+- [opoisso893](https://twitter.com/opoisso893)
+- Anonymous

@@ -1,4 +1,5 @@
-#include "ps4.h"
+#include <ps4.h>
+
 #include "defines.h"
 
 #ifdef DEBUG_SOCKET
@@ -22,9 +23,7 @@ void initDebugSocket(void)
 }
 
 void closeDebugSocket(void)
-{
 	sceNetSocketClose(sock);
-}
 
 #endif
 
