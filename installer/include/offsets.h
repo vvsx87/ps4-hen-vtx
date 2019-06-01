@@ -27,7 +27,7 @@
 #define enable_debug_rifs_patch1		0x064B2B0
 #define enable_debug_rifs_patch2		0x064B2D0
 
-// enable VR
-#define enable_vr_patch					0x14A63F1
+// sdk version spoof - enable all VR fws
+#define sdk_version_patch				0x14A63F0
 
 #endif

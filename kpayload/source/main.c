@@ -124,19 +124,19 @@ PAYLOAD_CODE void resolve_kdlsym()
 	resolve(sceSblAuthMgrVerifyHeader);
 
 	// Fpkg
-    resolve(sceSblPfsSetKeys);
-    resolve(sceSblKeymgrCleartKey);
+	resolve(sceSblPfsSetKeys);
+	resolve(sceSblKeymgrCleartKey);
 	resolve(sceSblKeymgrSetKeyForPfs);
-    resolve(sceSblKeymgrSetKeyStorage);
-    resolve(sceSblKeymgrSmCallfunc);
-    resolve(sceSblDriverSendMsg_0);
-    resolve(RsaesPkcs1v15Dec2048CRT);
-    resolve(AesCbcCfb128Encrypt);
-    resolve(AesCbcCfb128Decrypt);
-    resolve(Sha256Hmac);
+	resolve(sceSblKeymgrSetKeyStorage);
+	resolve(sceSblKeymgrSmCallfunc);
+	resolve(sceSblDriverSendMsg_0);
+	resolve(RsaesPkcs1v15Dec2048CRT);
+	resolve(AesCbcCfb128Encrypt);
+	resolve(AesCbcCfb128Decrypt);
+	resolve(Sha256Hmac);
 
 	// Patch
-    resolve(proc_rwmem);
+	resolve(proc_rwmem);
 	resolve(vmspace_acquire_ref);
 	resolve(vmspace_free);
 	resolve(vm_map_lock_read);

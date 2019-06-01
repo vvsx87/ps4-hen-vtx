@@ -226,6 +226,12 @@ PAYLOAD_CODE int shellcore_fpkg_patch(void)
 	if (ret)
 		goto error;
 
+	// enable support with 6.xx external hdd
+	ret = proc_write_mem(ssc, (void *)(text_seg_base + ext_hdd_patch), 1, "\xEB", &n);
+	if (ret)
+		goto error;
+
+
 error:
 	if (entries)
 		dealloc(entries);

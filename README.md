@@ -1,4 +1,4 @@
-# PS4HEN v2.1
+# PS4HEN v2.1.1
 
 ## Features
 - Homebrew Enabler
@@ -9,9 +9,11 @@
 - VR Support
 - Remote Package Install
 - Rest Mode Support
+- External HDD Format 6.xx Support
  
 ## Fixes
 - Black Screen Fix on Rest Mode
+- FW Version Spoof to 6.70
 
 ## Contributors
 Massive credits to the following:

@@ -73,7 +73,7 @@ int install_payload(struct thread *td, struct install_payload_args* args)
 	*(uint32_t *)(kernel_base + enable_debug_rifs_patch2) = 0x90C301B0;
 
 	// enable vr 5.05
-	*(uint32_t *)(kernel_base + enable_vr_patch) = 0x9090000;
+	*(uint32_t *)(kernel_base + sdk_version_patch) = FAKE_FW_VERSION;
 
 	// install kpayload
 	memset(payload_buffer, 0, PAGE_SIZE);

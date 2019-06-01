@@ -104,4 +104,7 @@
 // make pkgs installer working with external hdd
 #define pkg_installer_patch				0x9312A1
 
+// enable support with 6.xx external hdd
+#define ext_hdd_patch					0x593C7D
+
 #endif
