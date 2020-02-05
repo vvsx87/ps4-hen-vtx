@@ -231,6 +231,12 @@ PAYLOAD_CODE int shellcore_fpkg_patch(void)
 	if (ret)
 		goto error;
 
+	// enable debug trophies on retail
+	ret = proc_write_mem(ssc, (void *)(text_seg_base + debug_trophies_patch), 5, "\x31\xc0\x90\x90\x90", &n);
+	if (ret)
+	{
+		goto error;
+	}
 
 error:
 	if (entries)

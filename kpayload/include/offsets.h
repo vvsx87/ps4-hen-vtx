@@ -107,4 +107,7 @@
 // enable support with 6.xx external hdd
 #define ext_hdd_patch					0x593C7D
 
+// enable debug trophies on retail
+#define debug_trophies_patch			0x6ABE39
+
 #endif
