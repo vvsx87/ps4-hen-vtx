@@ -238,6 +238,12 @@ PAYLOAD_CODE int shellcore_fpkg_patch(void)
 		goto error;
 	}
 
+    // never disable screenshot - credits to Biorn1950
+    ret = proc_write_mem(ssc, (void *)(text_seg_base + disable_screenshot_patch), 5, "\x90\x90\x90\x90\x90", &n);
+    if (ret) {
+        goto error;
+    }
+
 error:
 	if (entries)
 		dealloc(entries);
@@ -245,9 +251,12 @@ error:
 	return ret;
 }
 
-PAYLOAD_CODE int shellui_debug_patch(void)
+PAYLOAD_CODE int shellui_patch(void)
 {
-	uint8_t *text_seg_base = NULL;
+    uint8_t *libkernel_sys_base = NULL,
+            *executable_base = NULL,
+            *app_base = NULL;
+
 	size_t n;
 
 	struct proc_vm_map_entry *entries = NULL;
@@ -274,29 +283,115 @@ PAYLOAD_CODE int shellui_debug_patch(void)
 		goto error;
 
 	for (int i = 0; i < num_entries; i++) {
-		if (!memcmp(entries[i].name, "libkernel_sys.sprx", 18) && (entries[i].prot == (PROT_READ | PROT_EXEC))) {
-			text_seg_base = (uint8_t *)entries[i].start;
-			break;
-		}
-	}
+        if (!memcmp(entries[i].name, "executable", 10) && (entries[i].prot >= (PROT_READ | PROT_EXEC))) {
+            executable_base = (uint8_t *)entries[i].start;
+            break;
+        }
+    }
 
-	if (!text_seg_base) {
-		ret = -1;
-		goto error;
-	}
+    if (!executable_base ) {
+        ret = 1;
+        goto error;
+    }
 
-	// enable debug settings menu
-	for (int i = 0; i < COUNT_OF(ofs_to_ret_1); i++) {
-		ret = proc_write_mem(ssui, (void *)(text_seg_base + ofs_to_ret_1[i]), sizeof(mov__eax_1__ret), mov__eax_1__ret, &n);
-		if (ret)
-			goto error;
-	}
+    // disable CreateUserForIDU
+    ret = proc_write_mem(ssui, (void *)(executable_base  + CreateUserForIDU_patch), 4, "\x48\x31\xC0\xC3", &n);
+    if (ret) {
+        goto error;
+    }
+
+    for (int i = 0; i < num_entries; i++) {
+        if (!memcmp(entries[i].name, "app.exe.sprx", 12) && (entries[i].prot >= (PROT_READ | PROT_EXEC))) {
+            app_base  = (uint8_t *)entries[i].start;
+            break;
+        }
+    }
+
+    if (!app_base) {
+        ret = 1;
+        goto error;
+    }
+
+    // enable remote play menu - credits to Aida
+    ret = proc_write_mem(ssui, (void *)(app_base  + remote_play_menu_patch), 5, "\xE9\x82\x02\x00\x00", &n);
+
+    for (int i = 0; i < num_entries; i++) {
+        if (!memcmp(entries[i].name, "libkernel_sys.sprx", 18) && (entries[i].prot >= (PROT_READ | PROT_EXEC))) {
+            libkernel_sys_base = (uint8_t *)entries[i].start;
+            break;
+        }
+    }
+
+    if (!libkernel_sys_base) {
+        ret = -1;
+        goto error;
+    }
+
+    // enable debug settings menu
+    for (int i = 0; i < COUNT_OF(ofs_to_ret_1); i++) {
+        ret = proc_write_mem(ssui, (void *)(libkernel_sys_base + ofs_to_ret_1[i]), sizeof(mov__eax_1__ret), mov__eax_1__ret, &n);
+        if (ret)
+            goto error;
+    }
 
 error:
-	if (entries)
-		dealloc(entries);
+    if (entries)
+        dealloc(entries);
 
-	return ret;
+    return ret;
+}
+
+PAYLOAD_CODE int remoteplay_patch() {
+
+    uint8_t *executable_base = NULL;
+
+    struct proc_vm_map_entry *entries = NULL;
+    size_t num_entries;
+    size_t n;
+
+    int ret = 0;
+
+    struct proc *srp = proc_find_by_name("SceRemotePlay");
+
+    if (!srp) {
+        ret = 1;
+        goto error;
+    }
+
+    if (proc_get_vm_map(srp, &entries, &num_entries)) {
+        ret = 1;
+        goto error;
+    }
+
+    for (int i = 0; i < num_entries; i++) {
+        if (!memcmp(entries[i].name, "executable", 10) && (entries[i].prot == (PROT_READ | PROT_EXEC))) {
+            executable_base = (uint8_t *)entries[i].start;
+            break;
+        }
+    }
+
+    if (!executable_base) {
+        ret = 1;
+        goto error;
+    }
+
+    // patch SceRemotePlay process
+    ret = proc_write_mem(srp, (void *)(executable_base + SceRemotePlay_patch1), 1, "\x01", &n);
+    if (ret) {
+        goto error;
+    }
+
+    ret = proc_write_mem(srp, (void *)(executable_base + SceRemotePlay_patch2), 2, "\xEB\x1E", &n);
+    if (ret) {
+        goto error;
+    }
+
+    error:
+    if (entries) {
+        dealloc(entries);
+    }
+
+    return ret;
 }
 
 PAYLOAD_CODE void set_dipsw(int debug_patch) {
@@ -326,9 +421,14 @@ PAYLOAD_CODE void restore_retail_dipsw()
 	set_dipsw(0);
 }
 
-PAYLOAD_CODE void install_debug_patches()
+PAYLOAD_CODE void apply_patches() {
+	shellui_patch();
+	remoteplay_patch();
+}
+
+PAYLOAD_CODE void install_patches()
 {
-	shellui_debug_patch();
+	apply_patches();
 	eventhandler_register(NULL, "system_suspend_phase3", &restore_retail_dipsw, NULL, EVENTHANDLER_PRI_PRE_FIRST);
-	eventhandler_register(NULL, "system_resume_phase4", &shellui_debug_patch, NULL, EVENTHANDLER_PRI_LAST);
+	eventhandler_register(NULL, "system_resume_phase4", &apply_patches, NULL, EVENTHANDLER_PRI_LAST);
 }

@@ -78,10 +78,11 @@ int (*vm_map_lookup_entry)(struct vm_map *map, uint64_t address, struct vm_map_e
 int (*proc_rwmem)(struct proc *p, struct uio *uio) PAYLOAD_BSS;
 
 // initialization, etc
-extern void install_fself_hooks(void)    PAYLOAD_CODE;
-extern void install_fpkg_hooks(void)     PAYLOAD_CODE;
-extern void install_debug_patches(void)  PAYLOAD_CODE;
-extern int shellcore_fpkg_patch(void)    PAYLOAD_CODE;
+extern void install_fself_hooks(void)         PAYLOAD_CODE;
+extern void install_fpkg_hooks(void)          PAYLOAD_CODE;
+extern void install_patches(void)             PAYLOAD_CODE;
+extern void install_fake_signout_patch(void)  PAYLOAD_CODE;
+extern int shellcore_fpkg_patch(void)         PAYLOAD_CODE;
 
 #define resolve(name) name = (void *)(kernbase + name##_addr)
 PAYLOAD_CODE void resolve_kdlsym()
@@ -149,7 +150,7 @@ PAYLOAD_CODE int my_entrypoint()
 	resolve_kdlsym();
 	install_fself_hooks();
 	install_fpkg_hooks();
-	install_debug_patches();
+	install_patches();
 	return shellcore_fpkg_patch();
 }
 

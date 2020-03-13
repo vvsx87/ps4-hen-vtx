@@ -78,6 +78,12 @@ int install_payload(struct thread *td, struct install_payload_args* args)
 	// spoof sdk_version - enable vr 5.05
 	*(uint32_t *)(kernel_base + sdk_version_patch) = FAKE_FW_VERSION;
 
+	// enable debug log
+	*(uint16_t*)(kernel_base + enable_debug_log_patch) = 0x38EB;
+
+	// enable uart output
+	*(uint32_t *)(kernel_base + enable_uart_patch) = 0;
+
 	// install kpayload
 	memset(payload_buffer, 0, PAGE_SIZE);
 	memcpy(payload_buffer, payload_data, payload_size);

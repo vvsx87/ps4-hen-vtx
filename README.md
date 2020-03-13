@@ -1,4 +1,4 @@
-# PS4HEN v2.1.2
+# PS4HEN v2.1.3
 
 ## Features
 - Homebrew Enabler
@@ -12,9 +12,10 @@
 - External HDD Format 7.xx Support
 - FW Version Spoof to 7.02
 - Debug Trophies Support
- 
-## Fixes
 - sys_dynlib_dlsym Patch
+- UART Enabler
+- Never Disable Screenshot
+- Remote Play Enabler
 
 ## Contributors
 Massive credits to the following:
@@ -28,6 +29,7 @@ Massive credits to the following:
 - [SiSTRo](https://github.com/SiSTR0)
 - [SocraticBliss](https://twitter.com/SocraticBliss)
 - [ChendoChap](https://github.com/ChendoChap)
+- [Biorn1950](https://github.com/Biorn1950)
 - Anonymous
 
 ## Testers

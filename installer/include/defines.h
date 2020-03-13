@@ -2,7 +2,7 @@
 #define __DEFINES_H__
 #pragma once
 
-#define VERSION "2.1.2"
+#define VERSION "2.1.3"
 
 //#define DEBUG_SOCKET
 
