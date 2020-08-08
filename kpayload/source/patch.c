@@ -20,7 +20,7 @@ extern void (*free)(void* addr, void* type) PAYLOAD_BSS;
 extern void* (*memcpy)(void* dst, const void* src, size_t len) PAYLOAD_BSS;
 extern void* (*memset)(void *s, int c, size_t n) PAYLOAD_BSS;
 extern int (*memcmp)(const void *ptr1, const void *ptr2, size_t num) PAYLOAD_BSS;
-extern void (*eventhandler_register)(void *list, const char *name, void *func, void *arg, int priority) PAYLOAD_BSS;
+extern void (*eventhandler_register)(void *list, const char *name, void *func, void *key, void *arg, int priority) PAYLOAD_BSS; // 5.5x-6.72
 
 extern void* M_TEMP PAYLOAD_BSS;
 extern struct proc** ALLPROC PAYLOAD_BSS;
@@ -174,6 +174,11 @@ PAYLOAD_CODE int shellcore_fpkg_patch(void)
 		nidf_libSceDipsw_patch4,
 	};
 
+	uint32_t ext_hdd_patch_offsets[] = {
+		ext_hdd_patch1,
+		ext_hdd_patch2,
+	};
+
 	uint8_t xor__eax_eax__inc__eax[5] = { 0x31, 0xC0, 0xFF, 0xC0, 0x90 };
 
 	struct proc *ssc = proc_find_by_name("SceShellCore");
@@ -211,8 +216,8 @@ PAYLOAD_CODE int shellcore_fpkg_patch(void)
 	if (ret) 
 		goto error;
 
-	// enable fpkg for patches
-	ret = proc_write_mem(ssc, (void *)(text_seg_base + enable_fpkg_patch), 8, "\xE9\x96\x00\x00\x00\x90\x90\x90", &n);
+	// enable fpkg for patches 6.72
+	ret = proc_write_mem(ssc, (void *)(text_seg_base + enable_fpkg_patch), 8, "\xE9\x98\x00\x00\x00\x90\x90\x90", &n); // 6.72
 	if (ret)
 		goto error;
 
@@ -227,9 +232,11 @@ PAYLOAD_CODE int shellcore_fpkg_patch(void)
 		goto error;
 
 	// enable support with 6.xx external hdd
-	ret = proc_write_mem(ssc, (void *)(text_seg_base + ext_hdd_patch), 1, "\xEB", &n);
-	if (ret)
-		goto error;
+	for (int i = 0; i < COUNT_OF(ext_hdd_patch_offsets); i++) {
+		ret = proc_write_mem(ssc, (void *)(text_seg_base + ext_hdd_patch_offsets[i]), 1, "\xEB", &n);
+		if (ret)
+			goto error;
+	}
 
 	// enable debug trophies on retail
 	ret = proc_write_mem(ssc, (void *)(text_seg_base + debug_trophies_patch), 5, "\x31\xc0\x90\x90\x90", &n);
@@ -312,8 +319,8 @@ PAYLOAD_CODE int shellui_patch(void)
         goto error;
     }
 
-    // enable remote play menu - credits to Aida
-    ret = proc_write_mem(ssui, (void *)(app_base  + remote_play_menu_patch), 5, "\xE9\x82\x02\x00\x00", &n);
+    // enable remote play menu - credits to Aida 6.72
+	ret = proc_write_mem(ssui, (void *)(app_base  + remote_play_menu_patch), 5, "\xE9\xBA\x02\x00\x00", &n); // 6.72
 
     for (int i = 0; i < num_entries; i++) {
         if (!memcmp(entries[i].name, "libkernel_sys.sprx", 18) && (entries[i].prot >= (PROT_READ | PROT_EXEC))) {
@@ -429,6 +436,6 @@ PAYLOAD_CODE void apply_patches() {
 PAYLOAD_CODE void install_patches()
 {
 	apply_patches();
-	eventhandler_register(NULL, "system_suspend_phase3", &restore_retail_dipsw, NULL, EVENTHANDLER_PRI_PRE_FIRST);
-	eventhandler_register(NULL, "system_resume_phase4", &apply_patches, NULL, EVENTHANDLER_PRI_LAST);
+	eventhandler_register(NULL, "system_suspend_phase3", &restore_retail_dipsw, "hen_suspend_patches", NULL, EVENTHANDLER_PRI_PRE_FIRST); // 5.5x-6.72
+	eventhandler_register(NULL, "system_resume_phase4", &apply_patches, "hen_resume_patches", NULL, EVENTHANDLER_PRI_LAST); // 5.5x-6.72
 }
