@@ -16,7 +16,6 @@
 - UART Enabler
 - Never Disable Screenshot
 - Remote Play Enabler
-- Fake Dex To Fix Blank Trophy Date Problem
 
 ## Contributors
 Massive credits to the following:
