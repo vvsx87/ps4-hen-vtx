@@ -95,14 +95,9 @@ int install_payload(struct thread *td, struct install_payload_args* args)
 	kmem[2] = 0xC3;
 
     //flatz Patch sys_dynlib_dlsym: Allow from anywhere
-	kmem = (uint8_t *)&kernel_base[sys_dynlib_dlsym_patch1];
+	kmem = (uint8_t *)&kernel_base[sys_dynlib_dlsym_patch];
 	kmem[0] = 0xEB;
 	kmem[1] = 0x4C;
-
-	kmem = (uint8_t *)&kernel_base[sys_dynlib_dlsym_patch2];
-	kmem[0] = 0x31;
-	kmem[1] = 0xC0;
-	kmem[2] = 0xC3;
 
 	// spoof sdk_version - enable vr
 	*(uint32_t *)(kernel_base + sdk_version_patch) = FAKE_FW_VERSION;
