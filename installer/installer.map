@@ -1,0 +1,203 @@
+
+Merging program properties
+
+Removed property 0xc0000002 to merge build/ddebug.o (0x3) and /tmp/cc52S1R4.o (not found)
+Removed property 0xc0000002 to merge build/ddebug.o (not found) and build/main.o (0x3)
+Removed property 0xc0000002 to merge build/ddebug.o (not found) and build/ps4.o (0x3)
+
+Discarded input sections
+
+ .data          0x0000000000000000        0x0 /tmp/cc52S1R4.o
+ .bss           0x0000000000000000        0x0 /tmp/cc52S1R4.o
+ .data          0x0000000000000000        0x0 /tmp/ccZjUlyx.o
+ .bss           0x0000000000000000        0x0 /tmp/ccZjUlyx.o
+ .text          0x0000000000000000        0x0 build/ddebug.o
+ .data          0x0000000000000000        0x0 build/ddebug.o
+ .bss           0x0000000000000000        0x0 build/ddebug.o
+ .comment       0x0000000000000000       0x2c build/ddebug.o
+ .note.GNU-stack
+                0x0000000000000000        0x0 build/ddebug.o
+ .note.gnu.property
+                0x0000000000000000       0x20 build/ddebug.o
+ .text          0x0000000000000000        0x0 build/embed.o
+ .data          0x0000000000000000        0x0 build/embed.o
+ .bss           0x0000000000000000        0x0 build/embed.o
+ .text          0x0000000000000000        0x0 build/main.o
+ .data          0x0000000000000000        0x0 build/main.o
+ .bss           0x0000000000000000        0x0 build/main.o
+ .bss.sock      0x0000000000000000        0x4 build/main.o
+ .comment       0x0000000000000000       0x2c build/main.o
+ .note.GNU-stack
+                0x0000000000000000        0x0 build/main.o
+ .note.gnu.property
+                0x0000000000000000       0x20 build/main.o
+ .eh_frame      0x0000000000000000       0xd0 build/main.o
+ .data          0x0000000000000000        0x0 build/ps4.o
+ .bss           0x0000000000000000        0x0 build/ps4.o
+ .comment       0x0000000000000000       0x2c build/ps4.o
+ .note.GNU-stack
+                0x0000000000000000        0x0 build/ps4.o
+ .note.gnu.property
+                0x0000000000000000       0x20 build/ps4.o
+ .eh_frame      0x0000000000000000       0x88 build/ps4.o
+
+Memory Configuration
+
+Name             Origin             Length             Attributes
+*default*        0x0000000000000000 0xffffffffffffffff
+
+Linker script and memory map
+
+LOAD /tmp/cc52S1R4.o
+LOAD /tmp/ccZjUlyx.o
+LOAD build/ddebug.o
+LOAD build/embed.o
+LOAD build/main.o
+LOAD build/ps4.o
+
+.text           0x0000000000000000      0x3de
+ *(.text.start)
+ *(.text*)
+ .text          0x0000000000000000        0x5 /tmp/cc52S1R4.o
+                0x0000000000000000                _start
+ .text          0x0000000000000005       0x2e /tmp/ccZjUlyx.o
+                0x0000000000000005                syscall
+                0x0000000000000008                syscall_macro
+ .text.install_payload
+                0x0000000000000033      0x163 build/main.o
+                0x0000000000000033                install_payload
+ .text.notify   0x0000000000000196       0x3b build/main.o
+                0x0000000000000196                notify
+ .text._main    0x00000000000001d1       0xab build/main.o
+                0x00000000000001d1                _main
+ .text          0x000000000000027c       0x30 build/ps4.o
+                0x000000000000027c                unlink
+                0x0000000000000288                kexec
+                0x0000000000000294                mkdir
+                0x00000000000002a0                getFunctionAddressByName
+ .text.loadModule
+                0x00000000000002ac       0x1e build/ps4.o
+                0x00000000000002ac                loadModule
+ .text.initKernel
+                0x00000000000002ca       0x80 build/ps4.o
+                0x00000000000002ca                initKernel
+ .text.initLibc
+                0x000000000000034a       0x60 build/ps4.o
+                0x000000000000034a                initLibc
+ .text.initSysUtil
+                0x00000000000003aa       0x34 build/ps4.o
+                0x00000000000003aa                initSysUtil
+
+.plt            0x00000000000003e0        0x0
+ .plt           0x00000000000003e0        0x0 /tmp/cc52S1R4.o
+
+.plt.got        0x00000000000003e0        0x0
+ .plt.got       0x00000000000003e0        0x0 /tmp/cc52S1R4.o
+
+.rodata         0x00000000000003e0     0x1c68
+ *(.rodata)
+ .rodata        0x00000000000003e0     0x1b44 build/embed.o
+                0x00000000000003e0                kpayload
+                0x0000000000001f20                kpayload_size
+ *(.rodata*)
+ .rodata.notify.str1.1
+                0x0000000000001f24        0x3 build/main.o
+ .rodata._main.str1.1
+                0x0000000000001f27       0x4e build/main.o
+ .rodata.initKernel.str1.1
+                0x0000000000001f75       0x56 build/ps4.o
+ .rodata.initLibc.str1.1
+                0x0000000000001fcb       0x2e build/ps4.o
+ .rodata.initSysUtil.str1.1
+                0x0000000000001ff9       0x4f build/ps4.o
+
+.gnu.version_d  0x0000000000002048        0x0
+ .gnu.version_d
+                0x0000000000002048        0x0 /tmp/cc52S1R4.o
+
+.gnu.version    0x0000000000002048        0x0
+ .gnu.version   0x0000000000002048        0x0 /tmp/cc52S1R4.o
+
+.gnu.version_r  0x0000000000002048        0x0
+ .gnu.version_r
+                0x0000000000002048        0x0 /tmp/cc52S1R4.o
+
+.dynsym         0x0000000000002048       0x18
+ .dynsym        0x0000000000002048       0x18 /tmp/cc52S1R4.o
+
+.dynstr         0x0000000000002060        0x1
+ .dynstr        0x0000000000002060        0x1 /tmp/cc52S1R4.o
+
+.gnu.hash       0x0000000000002068       0x1c
+ .gnu.hash      0x0000000000002068       0x1c /tmp/cc52S1R4.o
+
+.sframe         0x0000000000002084        0x0
+ .sframe        0x0000000000002084        0x0 /tmp/cc52S1R4.o
+
+.eh_frame_hdr   0x0000000000002084        0x0
+ .eh_frame_hdr  0x0000000000002084        0x0 build/main.o
+
+.rela.dyn       0x0000000000002088        0x0
+ .rela.plt      0x0000000000002088        0x0 /tmp/cc52S1R4.o
+ .rela.got      0x0000000000002088        0x0 /tmp/cc52S1R4.o
+ .rela.bss      0x0000000000002088        0x0 /tmp/cc52S1R4.o
+ .rela.data.rel.ro
+                0x0000000000002088        0x0 /tmp/cc52S1R4.o
+ .rela.ifunc    0x0000000000002088        0x0 /tmp/cc52S1R4.o
+
+.data
+ *(.data)
+
+.dynamic        0x0000000000002088       0xe0
+ .dynamic       0x0000000000002088       0xe0 /tmp/cc52S1R4.o
+                0x0000000000002088                _DYNAMIC
+
+.got            0x0000000000002168        0x0
+ .got           0x0000000000002168        0x0 /tmp/cc52S1R4.o
+
+.got.plt        0x0000000000002168        0x0
+ .got.plt       0x0000000000002168        0x0 /tmp/cc52S1R4.o
+
+.data.rel.ro    0x0000000000002168        0x0
+ .data.rel.ro   0x0000000000002168        0x0 /tmp/cc52S1R4.o
+
+.bss
+ *(.bss)
+
+.dynbss         0x0000000000002168        0x0
+ .dynbss        0x0000000000002168        0x0 /tmp/cc52S1R4.o
+
+.bss.sceSysUtilSendSystemNotificationWithText
+                0x0000000000002168        0x8
+ .bss.sceSysUtilSendSystemNotificationWithText
+                0x0000000000002168        0x8 build/ps4.o
+                0x0000000000002168                sceSysUtilSendSystemNotificationWithText
+
+.bss.sprintf    0x0000000000002170        0x8
+ .bss.sprintf   0x0000000000002170        0x8 build/ps4.o
+                0x0000000000002170                sprintf
+
+.bss.memcpy     0x0000000000002178        0x8
+ .bss.memcpy    0x0000000000002178        0x8 build/ps4.o
+                0x0000000000002178                memcpy
+
+.bss.memset     0x0000000000002180        0x8
+ .bss.memset    0x0000000000002180        0x8 build/ps4.o
+                0x0000000000002180                memset
+
+.bss.sceKernelLoadStartModule
+                0x0000000000002188        0x8
+ .bss.sceKernelLoadStartModule
+                0x0000000000002188        0x8 build/ps4.o
+                0x0000000000002188                sceKernelLoadStartModule
+
+.bss.__error    0x0000000000002190        0x8
+ .bss.__error   0x0000000000002190        0x8 build/ps4.o
+                0x0000000000002190                __error
+
+/DISCARD/
+ *(.comment)
+ *(.note.GNU-stack)
+ *(.eh_frame)
+ *(.interp)
+OUTPUT(temp.t elf64-x86-64)
