@@ -33,7 +33,7 @@ jobs:
 
     - name: Package binaries into a zip file
       run: |
-        zip ps4-hen-1070-1071-PPPwn-vtx.zip ps4-hen-1070-1071-PPPwn-vtx.bin stage2/stage2_10.70-10.71.bin
+        zip ps4-hen-1070-1071-PPPwn-vtx.zip ps4-hen-1070-1071-PPPwn-vtx.bin Stage2/stage2_10.70-10.71.bin
 
     - name: Release for branch 1070-1071-PPPwn
       if: github.event_name == 'push' && github.ref == 'refs/heads/1070-1071-PPPwn'
