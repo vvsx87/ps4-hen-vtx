@@ -1,0 +1,43 @@
+name: PS4 HEN Payload
+
+on: [push, pull_request]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set execute permissions for scripts
+      run: |
+        chmod +x clean.sh
+        chmod +x build.sh
+
+    - name: Install dependencies
+      run: sudo apt-get update && sudo apt-get install -y make gcc zip
+
+    - name: Build PS4SDK
+      run: |
+        cd PS4SDK/libPS4
+        make clean
+        make
+
+    - name: Build project
+      run: |
+        ./clean.sh
+        ./build.sh
+
+    - name: Package binaries into a zip file
+      run: |
+        zip ps4-hen-852-PPPwn-vtx.zip ps4-hen-852-PPPwn-vtx.bin Stage2/*
+
+    - name: Release for branch 852-PPPwn
+      if: github.event_name == 'push' && github.ref == 'refs/heads/852-PPPwn'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        gh release create 852-PPPwn-1.0${{ GITHUB.RUN_NUMBER }} ps4-hen-852-PPPwn-vtx.zip --target ${{ GITHUB.SHA }} -t 852-PPPwn-1.0${{ GITHUB.RUN_NUMBER }}
