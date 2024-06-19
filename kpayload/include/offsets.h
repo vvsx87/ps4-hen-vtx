@@ -119,7 +119,7 @@
 #define ext_hdd_patch                   0x0060761D
 
 // enable debug trophies on retail
-#define debug_trophies_patch            0x0072D669
+#define debug_trophies_patch            0x00729659
 
 // disable screenshot block
 //#define disable_screenshot_patch        0x0
