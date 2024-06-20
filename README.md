@@ -37,6 +37,7 @@ Massive credits to the following:
 Massive Thanks to the following:
 - [BestPig](https://twitter.com/BestPig)
 - [LM](https://twitter.com/LightningMods)
+- [Al-Azif](https://github.com/Al-Azif)
 - [zecoxao](https://twitter.com/notzecoxao)
 
 ## Testers
