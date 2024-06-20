@@ -90,44 +90,36 @@
 // #define SceRemotePlay_patch1                                        0x0
 // #define SceRemotePlay_patch2                                        0x0
 
-// call sceVshAvcapSetInfo
-//#define sceVshAvcapSetInfo_patch1       0x0
-//#define sceVshAvcapSetInfo_patch2       0x0
-//#define sceVshAvcapSetInfo_patch3       0x0
-//#define sceVshAvcapSetInfo_patch4       0x0
-//#define sceVshAvcapSetInfo_patch5       0x0
-//#define sceVshAvcapSetInfo_patch6       0x0
-
 // SceShellCore patches
 // call sceKernelIsGenuineCEX
-#define sceKernelIsGenuineCEX_patch1    0x0016CD64
-#define sceKernelIsGenuineCEX_patch2    0x008630A4
-#define sceKernelIsGenuineCEX_patch3    0x008B1CA2
-#define sceKernelIsGenuineCEX_patch4    0x00A122C4
+#define sceKernelIsGenuineCEX_patch1    0x0016C364
+#define sceKernelIsGenuineCEX_patch2    0x00861BE4
+#define sceKernelIsGenuineCEX_patch3    0x008B07E2
+#define sceKernelIsGenuineCEX_patch4    0x00A10E04
 
 // call nidf_libSceDipsw
-#define nidf_libSceDipsw_patch1         0x0016CD92
-#define nidf_libSceDipsw_patch2         0x0024A35C
-#define nidf_libSceDipsw_patch3         0x008630D2
-#define nidf_libSceDipsw_patch4         0x00A122F2
+#define nidf_libSceDipsw_patch1         0x0016C392
+#define nidf_libSceDipsw_patch2         0x00248FEC
+#define nidf_libSceDipsw_patch3         0x00861C12
+#define nidf_libSceDipsw_patch4         0x00A10E32
 
 // enable data mount
-#define enable_data_mount_patch         0x0031D651
+#define enable_data_mount_patch         0x0031C2E1
 
 // enable fpkg
-#define enable_fpkg_patch               0x003D4E9F
+#define enable_fpkg_patch               0x003D3B2F
  
 // debug pkg free string
-#define fake_free_patch                 0x00FBD319
+#define fake_free_patch                 0x00FBB8D9
 
 // make pkgs installer working with external hdd
-#define pkg_installer_patch             0x009FB811
+#define pkg_installer_patch             0x009FA351
 
 // enable support with 11.00 external hdd
-#define ext_hdd_patch                   0x00610AED
+#define ext_hdd_patch                   0x0060F71D
 
 // enable debug trophies on retail
-#define debug_trophies_patch            0x00741E09
+#define debug_trophies_patch            0x00740949
 
 // disable screenshot block
 // #define disable_screenshot_patch        0x0
