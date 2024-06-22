@@ -2,15 +2,12 @@
 #define __DEFINES_H__
 #pragma once
 
-#define VERSION "2.1.3"
+#define VERSION "2.1.4"
 
 //#define DEBUG_SOCKET
 
 #define LOG_IP   "192.168.1.3\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
 #define LOG_PORT 9023
-
-#define FAKE_FW_VERSION 0x11500000
-#define FAKE_DEX        0x0C100080
 
 struct payload_info {
 	uint8_t* buffer;
