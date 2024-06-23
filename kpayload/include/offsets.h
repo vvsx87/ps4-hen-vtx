@@ -123,7 +123,7 @@
 #define ext_hdd_patch                   0x0061A69D
 
 // SceShellCore patches - enable debug trophies
-#define debug_trophies_patch            0x00741629
+#define debug_trophies_patch            0x00741839
 
 // SceShellCore patches - disable screenshot block
 #define disable_screenshot_patch        0x0038EE26
