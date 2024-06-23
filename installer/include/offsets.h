@@ -31,13 +31,10 @@
 #define enable_debug_rifs_patch1        0x00643EA0
 #define enable_debug_rifs_patch2        0x00643ED0
 
-// sdk version spoof - enable all VR fws
-#define sdk_version_patch               0x01257610
-
 // enable debug log
 #define enable_debug_log_patch          0x00205557
 
 // enable uart output
-#define enable_uart_patch               0x0
+#define enable_uart_patch               0x01A50BE0
 
 #endif
