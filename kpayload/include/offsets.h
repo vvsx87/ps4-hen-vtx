@@ -2,7 +2,7 @@
 #define __OFFSETS_H__
 #pragma once
 
-// 9.50
+// 9.60
 // data
 #define XFAST_SYSCALL_addr               0x000001C0
 #define M_TEMP_addr                      0x01A4ECB0
@@ -59,8 +59,6 @@
 #define vm_map_unlock_read_addr          0x00191D80
 #define vm_map_lookup_entry_addr         0x00192370
 #define proc_rwmem_addr                  0x00479620
-                                         
-#define printf_hook                      0x01A72E98
 
 // Fself hooks
 #define sceSblAuthMgrIsLoadable__sceSblACMgrGetPathId_hook          0x006390EC
@@ -82,54 +80,51 @@
 #define sceSblRcMgrIsAllowDebugMenuForSettings_patch                0x0001CE50
 #define sceSblRcMgrIsStoreMode_patch                                0x0001D1B0
 
-// SceShellUI patches - remote play patches                                
-// #define CreateUserForIDU_patch                                      0x0
-// #define remote_play_menu_patch                                      0x0
+// SceShellUI patches - remote play patches
+#define CreateUserForIDU_patch                                      0x00185160 //system_ex\app\NPXS20001\eboot.bin
+#define remote_play_menu_patch                                      0x00EEFF41 //system_ex\app\NPXS20001\psm\Application\app.exe.sprx
 
-// SceRemotePlay patches - remote play patches
-// #define SceRemotePlay_patch1                                        0x0
-// #define SceRemotePlay_patch2                                        0x0
+// SceRemotePlay patches - remote play patches - system\vsh\app\NPXS21006
+#define SceRemotePlay_patch1                                        0x000EA0B5
+#define SceRemotePlay_patch2                                        0x000EA0D0
 
-// call sceVshAvcapSetInfo
-//#define sceVshAvcapSetInfo_patch1       0x0
-//#define sceVshAvcapSetInfo_patch2       0x0
-//#define sceVshAvcapSetInfo_patch3       0x0
-//#define sceVshAvcapSetInfo_patch4       0x0
-//#define sceVshAvcapSetInfo_patch5       0x0
-//#define sceVshAvcapSetInfo_patch6       0x0
-
-// SceShellCore patches
-// call sceKernelIsGenuineCEX
+// SceShellCore patches - call sceKernelIsGenuineCEX
 #define sceKernelIsGenuineCEX_patch1    0x0016CD64
 #define sceKernelIsGenuineCEX_patch2    0x008630A4
 #define sceKernelIsGenuineCEX_patch3    0x008B1CA2
 #define sceKernelIsGenuineCEX_patch4    0x00A122C4
 
-// call nidf_libSceDipsw
+// SceShellCore patches - call nidf_libSceDipsw
 #define nidf_libSceDipsw_patch1         0x0016CD92
 #define nidf_libSceDipsw_patch2         0x0024A35C
 #define nidf_libSceDipsw_patch3         0x008630D2
 #define nidf_libSceDipsw_patch4         0x00A122F2
 
-// enable data mount
+// SceShellCore patches - bypass firmware checks
+#define app_installer_patch             0x00135760
+#define check_system_version            0x003C1F97
+#define check_title_system_update_patch 0x003C51E0
+
+// SceShellCore patches - enable remote pkg installer
 #define enable_data_mount_patch         0x0031D651
 
-// enable fpkg
+// SceShellCore patches - enable VR without spoof
+#define enable_psvr_patch               0x0  //0D40761
+
+// SceShellCore patches - enable fpkg
 #define enable_fpkg_patch               0x003D4E9F
  
-// debug pkg free string
+// SceShellCore patches - use `free` prefix instead `fake`
 #define fake_free_patch                 0x00FBD319
 
-// make pkgs installer working with external hdd
+// SceShellCore patches - enable official external HDD support
 #define pkg_installer_patch             0x009FB811
-
-// enable support with 11.00 external hdd
 #define ext_hdd_patch                   0x00610AED
 
-// enable debug trophies on retail
-#define debug_trophies_patch            0x00741E09
+// SceShellCore patches - enable debug trophies
+#define debug_trophies_patch            0x00741C99
 
-// disable screenshot block
-// #define disable_screenshot_patch        0x0
+// SceShellCore patches - disable screenshot block
+#define disable_screenshot_patch        0x0038C066
 
 #endif
