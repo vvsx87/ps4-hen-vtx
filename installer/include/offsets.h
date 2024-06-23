@@ -34,13 +34,10 @@
 #define sys_dynlib_dlsym_patch1         0x0019025F
 #define sys_dynlib_dlsym_patch2         0x001BEA40
 
-// sdk version spoof - enable all VR fws
-#define sdk_version_patch               0x00D352F8
-
 // enable debug log
-//#define enable_debug_log_patch          0x000C51D7
+#define enable_debug_log_patch          0x000C51D7
 
 // enable uart output
-//#define enable_uart_patch               0x0
+#define enable_uart_patch               0x01A78A78
 
 #endif

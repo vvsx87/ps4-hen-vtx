@@ -73,8 +73,18 @@ int install_payload(struct thread *td, struct payload_info* payload_info)
 	kmem[1] = 0xC0;
 	kmem[2] = 0xC3;
 
-	// spoof sdk_version - enable vr
-	*(uint32_t *)(kernel_base + sdk_version_patch) = FAKE_FW_VERSION;
+	// Enable *all* debugging logs (in vprintf)
+	// Patch by: SiSTRo
+	kmem = (uint8_t *)&kernel_base[enable_debug_log_patch];
+	kmem[0] = 0xEB;
+	kmem[1] = 0x3B;
+
+	// Enable UART
+	kmem = (uint8_t *)&kernel_base[enable_uart_patch];
+	kmem[0] = 0x00;
+	kmem[1] = 0x00;
+	kmem[2] = 0x00;
+	kmem[3] = 0x00;
 
 	// install kpayload
 	memset(payload_buffer, 0, PAGE_SIZE);
