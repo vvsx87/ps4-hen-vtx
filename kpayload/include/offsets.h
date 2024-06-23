@@ -76,7 +76,7 @@
 #define mountpfs__sceSblPfsSetKeys_hook1                            0x006C1EB9
 #define mountpfs__sceSblPfsSetKeys_hook2                            0x006C20EA
 
-//SceShellUI patches - debug patches
+//libkernel_sys.sprx patches - debug patches
 #define sceSblRcMgrIsAllowDebugMenuForSettings_patch                0x0001D1C0
 #define sceSblRcMgrIsStoreMode_patch                                0x0001D520
 
@@ -110,7 +110,7 @@
 #define enable_data_mount_patch         0x00321F2B
 
 // SceShellCore patches - enable VR without spoof
-#define enable_psvr_patch               0x00D5A4DF
+#define enable_psvr_patch               0x00D5A4D1
 
 // SceShellCore patches - enable fpkg
 #define enable_fpkg_patch               0x003DA06F
