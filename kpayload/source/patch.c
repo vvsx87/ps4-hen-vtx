@@ -20,8 +20,7 @@ extern void (*free)(void* addr, void* type) PAYLOAD_BSS;
 extern void* (*memcpy)(void* dst, const void* src, size_t len) PAYLOAD_BSS;
 extern void* (*memset)(void *s, int c, size_t n) PAYLOAD_BSS;
 extern int (*memcmp)(const void *ptr1, const void *ptr2, size_t num) PAYLOAD_BSS;
-extern int (*printf)(const char *fmt, ...) PAYLOAD_BSS;
-extern void (*eventhandler_register)(void *list, const char *name, void *func, void *key, void *arg, int priority) PAYLOAD_BSS; // 5.5x-6.72
+extern void (*eventhandler_register)(void *list, const char *name, void *func, void *arg, int priority) PAYLOAD_BSS;
 
 extern void* M_TEMP PAYLOAD_BSS;
 extern struct proc** ALLPROC PAYLOAD_BSS;
@@ -175,11 +174,6 @@ PAYLOAD_CODE int shellcore_fpkg_patch(void)
 		nidf_libSceDipsw_patch4,
 	};
 
-	//uint32_t ext_hdd_patch_offsets[] = {
-	//	ext_hdd_patch1,
-	//	ext_hdd_patch2,
-	//};
-
 	uint8_t xor__eax_eax__inc__eax[5] = { 0x31, 0xC0, 0xFF, 0xC0, 0x90 };
 
 	struct proc *ssc = proc_find_by_name("SceShellCore");
@@ -217,10 +211,30 @@ PAYLOAD_CODE int shellcore_fpkg_patch(void)
 	if (ret) 
 		goto error;
 
-	// enable fpkg for patches 6.72
-	ret = proc_write_mem(ssc, (void *)(text_seg_base + enable_fpkg_patch), 8, "\xE9\x98\x00\x00\x00\x90\x90\x90", &n); // 6.72
+	// enable fpkg for patches
+	ret = proc_write_mem(ssc, (void *)(text_seg_base + enable_fpkg_patch), 8, "\xE9\x96\x00\x00\x00\x90\x90\x90", &n);
 	if (ret)
 		goto error;
+
+	// check_disc_root_param_patch
+	ret = proc_write_mem(ssc, (void *)(text_seg_base + check_disc_root_param_patch), 2, "\x90\xE9", &n);
+	if (ret)
+		goto error;
+
+        // app_installer_patch
+        ret = proc_write_mem(ssc, (void *)(text_seg_base + app_installer_patch), 1, "\xEB", &n); 
+        if (ret)
+	        goto error;
+
+        // check_system_version
+        ret = proc_write_mem(ssc, (void *)(text_seg_base + check_system_version), 1, "\xEB", &n);
+        if (ret)
+	        goto error;
+
+        // check_title_system_update_patch
+        ret = proc_write_mem(ssc, (void *)(text_seg_base + check_title_system_update_patch), 4, "\x48\x31\xC0\xC3", &n);
+        if (ret)
+	        goto error;
 
 	// this offset corresponds to "fake\0" string in the Shellcore's memory
 	ret = proc_write_mem(ssc, (void *)(text_seg_base + fake_free_patch), 5, "free\0", &n);
@@ -232,29 +246,26 @@ PAYLOAD_CODE int shellcore_fpkg_patch(void)
 	if (ret)
 		goto error;
 
-	// enable support with 9.xx external hdd
-	//for (int i = 0; i < COUNT_OF(ext_hdd_patch_offsets); i++) {
-		//ret = proc_write_mem(ssc, (void *)(text_seg_base + ext_hdd_patch_offsets[i]), 1, "\xEB", &n);
-                ret = proc_write_mem(ssc, (void *)(text_seg_base + ext_hdd_patch), 1, "\xEB", &n);
-		if (ret)
-			goto error;
-	//}
+	// enable support with 6.xx external hdd
+	ret = proc_write_mem(ssc, (void *)(text_seg_base + ext_hdd_patch), 1, "\xEB", &n);
+	if (ret)
+		goto error;
 
-	//TODO: Find 9.00 Offsets
 	// enable debug trophies on retail
-	//ret = proc_write_mem(ssc, (void *)(text_seg_base + debug_trophies_patch), 5, "\x31\xc0\x90\x90\x90", &n);
-	//if (ret)
-	//{
-	//	goto error;
-	//}
+	ret = proc_write_mem(ssc, (void *)(text_seg_base + debug_trophies_patch), 5, "\x31\xc0\x90\x90\x90", &n);
+	if (ret)
+		goto error;
 
-    //TODO: Find 9.00 Offsets
-	// never disable screenshot - credits to Biorn1950
-    //ret = proc_write_mem(ssc, (void *)(text_seg_base + disable_screenshot_patch), 5, "\x90\x90\x90\x90\x90", &n);
-    //if (ret) {
-    //    goto error;
-    //}
+        // never disable screenshot - credits to Biorn1950
+        ret = proc_write_mem(ssc, (void *)(text_seg_base + disable_screenshot_patch), 5, "\x90\x90\x90\x90\x90", &n);
+        if (ret) {
+                goto error;
 
+       // enable ps vr without spoofer
+       ret = proc_write_mem(ssc, (void *)(text_seg_base + enable_psvr_patch), 3, "\x31\xC0\xC3", &n);
+       if (ret)
+               goto error;
+}
 error:
 	if (entries)
 		dealloc(entries);
@@ -306,10 +317,10 @@ PAYLOAD_CODE int shellui_patch(void)
     }
 
     // disable CreateUserForIDU
-    //ret = proc_write_mem(ssui, (void *)(executable_base  + CreateUserForIDU_patch), 4, "\x48\x31\xC0\xC3", &n);
-    //if (ret) {
-    //    goto error;
-    //}
+    ret = proc_write_mem(ssui, (void *)(executable_base  + CreateUserForIDU_patch), 4, "\x48\x31\xC0\xC3", &n);
+    if (ret) {
+        goto error;
+    }
 
     for (int i = 0; i < num_entries; i++) {
         if (!memcmp(entries[i].name, "app.exe.sprx", 12) && (entries[i].prot >= (PROT_READ | PROT_EXEC))) {
@@ -323,8 +334,8 @@ PAYLOAD_CODE int shellui_patch(void)
         goto error;
     }
 
-    // enable remote play menu - credits to Aida 6.72
-	//ret = proc_write_mem(ssui, (void *)(app_base  + remote_play_menu_patch), 5, "\xE9\xBA\x02\x00\x00", &n); // 6.72
+    // enable remote play menu - credits to Aida
+    ret = proc_write_mem(ssui, (void *)(app_base  + remote_play_menu_patch), 5, "\xE9\x82\x02\x00\x00", &n);
 
     for (int i = 0; i < num_entries; i++) {
         if (!memcmp(entries[i].name, "libkernel_sys.sprx", 18) && (entries[i].prot >= (PROT_READ | PROT_EXEC))) {
@@ -387,15 +398,15 @@ PAYLOAD_CODE int remoteplay_patch() {
     }
 
     // patch SceRemotePlay process
-    //ret = proc_write_mem(srp, (void *)(executable_base + SceRemotePlay_patch1), 1, "\x01", &n);
-    //if (ret) {
-    //    goto error;
-    //}
+    ret = proc_write_mem(srp, (void *)(executable_base + SceRemotePlay_patch1), 1, "\x01", &n);
+    if (ret) {
+        goto error;
+    }
 
-    //ret = proc_write_mem(srp, (void *)(executable_base + SceRemotePlay_patch2), 2, "\xEB\x1E", &n);
-    //if (ret) {
-    //    goto error;
-    //}
+    ret = proc_write_mem(srp, (void *)(executable_base + SceRemotePlay_patch2), 2, "\xEB\x1E", &n);
+    if (ret) {
+        goto error;
+    }
 
     error:
     if (entries) {
@@ -434,12 +445,12 @@ PAYLOAD_CODE void restore_retail_dipsw()
 
 PAYLOAD_CODE void apply_patches() {
 	shellui_patch();
-	//remoteplay_patch();
+	remoteplay_patch();
 }
 
 PAYLOAD_CODE void install_patches()
 {
 	apply_patches();
-	eventhandler_register(NULL, "system_suspend_phase3", &restore_retail_dipsw, "hen_suspend_patches", NULL, EVENTHANDLER_PRI_PRE_FIRST); // 5.5x-6.72
-	eventhandler_register(NULL, "system_resume_phase4", &apply_patches, "hen_resume_patches", NULL, EVENTHANDLER_PRI_LAST); // 5.5x-6.72
+	eventhandler_register(NULL, "system_suspend_phase3", &restore_retail_dipsw, NULL, EVENTHANDLER_PRI_PRE_FIRST);
+	eventhandler_register(NULL, "system_resume_phase4", &apply_patches, NULL, EVENTHANDLER_PRI_LAST);
 }
