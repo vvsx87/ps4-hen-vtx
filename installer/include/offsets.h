@@ -10,13 +10,10 @@
 #define ROOTVNODE_addr                  0x01B8C730
 #define PMAP_STORE_addr                 0x02245C40
 #define DT_HASH_SEGMENT_addr            0x00CE68A8
-#define M_TEMP_addr                     0x01A77E10
 
 // Functions
 #define pmap_protect_addr               0x00383600
 #define pmap_protect_p_addr             0x00383647
-#define malloc_addr                     0x0046F7F0
-#define printf_addr                     0x00430AE0
 
 // Patches
 // debug menu error
@@ -34,13 +31,10 @@
 #define sys_dynlib_dlsym_patch1         0x0031953F
 #define sys_dynlib_dlsym_patch2         0x000951C0
 
-// sdk version spoof - enable all VR fws
-//#define sdk_version_patch               0x01274990
-
 // enable debug log
-//#define enable_debug_log_patch          0x00430BC7
+#define enable_debug_log_patch          0x00430BC7
 
 // enable uart output
-//#define enable_uart_patch               0x0
+#define enable_uart_patch               0x0155D190
 
 #endif
