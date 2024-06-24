@@ -110,7 +110,7 @@
 #define enable_data_mount_patch         0x00320713
 
 // SceShellCore patches - enable VR without spoof
-#define enable_psvr_patch               0x00D9B8B0
+#define enable_psvr_patch               0x00D4354F
 
 // SceShellCore patches - enable fpkg
 #define enable_fpkg_patch               0x003D3ADF
