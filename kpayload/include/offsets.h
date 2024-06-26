@@ -60,8 +60,6 @@
 #define vm_map_lookup_entry_addr        0x003E7CC0
 #define proc_rwmem_addr                 0x00173770
 
-#define printf_hook 0x001A7AE58
-
 // Fself hooks
 #define sceSblAuthMgrIsLoadable__sceSblACMgrGetPathId_hook          0x0063B8BC
 #define sceSblAuthMgrIsLoadable2_hook                               0x0063BA0E
@@ -78,20 +76,19 @@
 #define mountpfs__sceSblPfsSetKeys_hook1                            0x0068D509
 #define mountpfs__sceSblPfsSetKeys_hook2                            0x0068D73A
 
-// SceShellUI patches - debug patches
+//libkernel_sys.sprx patches - debug patches
 #define sceSblRcMgrIsAllowDebugMenuForSettings_patch                0x0001D130
 #define sceSblRcMgrIsStoreMode_patch                                0x0001D490
 
-// SceShellUI patches - remote play patches
-//#define CreateUserForIDU_patch                                      0x0
-//#define remote_play_menu_patch                                      0x0
+//ShellUI patches - remote play patches                                
+#define CreateUserForIDU_patch                                      0x00187300 //system_ex\app\NPXS20001\eboot.bin
+#define remote_play_menu_patch                                      0x00EDB1B1 //system_ex\app\NPXS20001\psm\Application\app.exe.sprx
 
-// SceRemotePlay patches - remote play patches
-//#define SceRemotePlay_patch1                                        0x0
-//#define SceRemotePlay_patch2                                        0x0
+// SceRemotePlay patches - remote play patches - system\vsh\app\NPXS21006
+#define SceRemotePlay_patch1                                        0x0010C4C8
+#define SceRemotePlay_patch2                                        0x0010C4E6
 
-// SceShellCore patches
-// call sceKernelIsGenuineCEX
+// SceShellCore patches - call nidf_libSceDipsw
 #define sceKernelIsGenuineCEX_patch1    0x00168D20
 #define sceKernelIsGenuineCEX_patch2    0x0084CFD0
 #define sceKernelIsGenuineCEX_patch3    0x0089C132
@@ -103,25 +100,32 @@
 #define nidf_libSceDipsw_patch3         0x0084CFFA
 #define nidf_libSceDipsw_patch4         0x00A2360A
 
-// enable data mount
+// SceShellCore patches - bypass firmware checks
+#define check_disc_root_param_patch     0x00133480
+#define app_installer_patch             0x00133570
+#define check_system_version            0x003C02E7
+#define check_title_system_update_patch 0x003C2970
+
+// SceShellCore patches - enable remote pkg installer
 #define enable_data_mount_patch         0x0031C503
 
-// enable fpkg
+// SceShellCore patches - enable VR without spoof
+#define enable_psvr_patch               0x00DA7480
+
+// SceShellCore patches - enable fpkg
 #define enable_fpkg_patch               0x003D1A2F
 
-// debug pkg free string
+// SceShellCore patches - use `free` prefix instead `fake`
 #define fake_free_patch                 0x00FC61F1
 
-// make pkgs installer working with external hdd
+// SceShellCore patches - enable official external HDD support
 #define pkg_installer_patch             0x00A0C5C1
-
-// enable support with 6.xx external hdd
 #define ext_hdd_patch                   0x0060756D
 
-// enable debug trophies on retail
-#define debug_trophies_patch            0x0072D5B9
+// SceShellCore patches - enable debug trophies
+#define debug_trophies_patch            0x007295A6
 
-// disable screenshot block
-//#define disable_screenshot_patch        0x0
+// SceShellCore patches - disable screenshot block
+#define disable_screenshot_patch        0x003862F6
 
 #endif
