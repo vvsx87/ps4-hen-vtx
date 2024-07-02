@@ -10,7 +10,7 @@
 extern char kpayload[];
 extern unsigned kpayload_size;
 
-int install_payload(struct thread *td, struct payload_info* payload_info)
+int install_payload(struct thread *td, struct install_payload_args* args)
 {
 
 	uint8_t* kernel_base = (uint8_t*)(__readmsr(0xC0000082) - XFAST_SYSCALL_addr);
@@ -18,8 +18,8 @@ int install_payload(struct thread *td, struct payload_info* payload_info)
 	void (*pmap_protect)(void * pmap, uint64_t sva, uint64_t eva, uint8_t pr) = (void *)(kernel_base + pmap_protect_addr);
 	void *kernel_pmap_store = (void *)(kernel_base + PMAP_STORE_addr);
 
-	uint8_t* payload_data = payload_info->buffer;
-	size_t payload_size = payload_info->size;
+    	uint8_t* payload_data = args->payload_info->buffer;
+    	size_t payload_size = args->payload_info->size;
 	struct payload_header* payload_header = (struct payload_header*)payload_data;
 	uint8_t* payload_buffer = (uint8_t*)&kernel_base[DT_HASH_SEGMENT_addr];
 
@@ -125,8 +125,8 @@ int _main(struct thread *td)
 	initNetwork();
 	initDebugSocket();
 #endif
-
-	printfsocket("Starting...\n");
+	
+        printfsocket("Starting...\n");
 
 	struct payload_info payload_info;
 	payload_info.buffer = (uint8_t *)kpayload;
