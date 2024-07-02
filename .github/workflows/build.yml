@@ -33,11 +33,11 @@ jobs:
 
     - name: Package binaries into a zip file
       run: |
-        zip ps4-hen-107X-PPPwn-vtx.zip ps4-hen-107X-PPPwn-vtx.bin Stage2/*
+        zip ps4-hen-1070-1071-PPPwn-vtx.zip ps4-hen-1070-1071-PPPwn-vtx.bin Stage2/*
 
     - name: Release for branch 1070-1071-PPPwn
       if: github.event_name == 'push' && github.ref == 'refs/heads/1070-1071-PPPwn'
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        gh release create 107X-PPPwn-1.0${{ GITHUB.RUN_NUMBER }} ps4-hen-107X-PPPwn-vtx.zip --target ${{ GITHUB.SHA }} -t 107X-PPPwn-1.0${{ GITHUB.RUN_NUMBER }}
+        gh release create 1070-1071-PPPwn-1.0${{ GITHUB.RUN_NUMBER }} ps4-hen-1070-1071-PPPwn-vtx.zip --target ${{ GITHUB.SHA }} -t 1070-1071-PPPwn-1.0${{ GITHUB.RUN_NUMBER }}
