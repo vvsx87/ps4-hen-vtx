@@ -31,9 +31,6 @@
 #define sys_dynlib_dlsym_patch1         0x0023B67F
 #define sys_dynlib_dlsym_patch2         0x00221B40
 
-// sdk version spoof - enable all VR fws
-#define sdk_version_patch               0x1A6CDF0
-
 // enable debug log
 #define enable_debug_log_patch          0x000B7B17
 

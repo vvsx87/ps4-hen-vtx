@@ -1,22 +1,19 @@
 #include <ps4.h>
 
 #include "defines.h"
-#include "debug.h"
+#include "ddebug.h"
 #include "offsets.h"
 
 #define PS4_UPDATE_FULL_PATH "/update/PS4UPDATE.PUP"
 #define PS4_UPDATE_TEMP_PATH "/update/PS4UPDATE.PUP.net.temp"
 
 extern char kpayload[];
-unsigned kpayload_size;
+extern unsigned kpayload_size;
 
 int install_payload(struct thread *td, struct install_payload_args* args)
 {
-	struct ucred* cred;
-	struct filedesc* fd;
-
-	fd = td->td_proc->p_fd;
-	cred = td->td_proc->p_ucred;
+        struct ucred* cred = td -> td_proc -> p_ucred;
+        struct filedesc* fd = td -> td_proc -> p_fd;
 
 	uint8_t* kernel_base = (uint8_t*)(__readmsr(0xC0000082) - XFAST_SYSCALL_addr);
 	uint8_t* kernel_ptr = (uint8_t*)kernel_base;
@@ -42,9 +39,6 @@ int install_payload(struct thread *td, struct install_payload_args* args)
 	cred->cr_prison = *got_prison0;
 	fd->fd_rdir = fd->fd_jdir = *got_rootvnode;
 
-	// Use "kmem" for all patches
-    uint8_t *kmem;
-
 	// escalate ucred privs, needed for access to the filesystem ie* mounting & decrypting files
 	void *td_ucred = *(void **)(((char *)td) + 304); // p_ucred == td_ucred
 
@@ -59,6 +53,9 @@ int install_payload(struct thread *td, struct install_payload_args* args)
 	// sceSblACMgrHasSceProcessCapability
 	uint64_t *sceProcCap = (uint64_t *)(((char *)td_ucred) + 104);
 	*sceProcCap = 0xffffffffffffffff; // Sce Process
+
+	// Use "kmem" for all patches
+        uint8_t *kmem;
 
 	// Disable write protection
 	uint64_t cr0 = readCr0();
@@ -94,7 +91,7 @@ int install_payload(struct thread *td, struct install_payload_args* args)
 	kmem[1] = 0x01;
 	kmem[2] = 0xC3;
 
-    //flatz Patch sys_dynlib_dlsym: Allow from anywhere
+        //flatz Patch sys_dynlib_dlsym: Allow from anywhere
 	kmem = (uint8_t *)&kernel_base[sys_dynlib_dlsym_patch1];
 	kmem[0] = 0xEB;
 	kmem[1] = 0x4C;
@@ -103,9 +100,6 @@ int install_payload(struct thread *td, struct install_payload_args* args)
 	kmem[0] = 0x31;
 	kmem[1] = 0xC0;
 	kmem[2] = 0xC3;
-
-	// spoof sdk_version - enable vr
-	*(uint32_t *)(kernel_base + sdk_version_patch) = FAKE_FW_VERSION;
 
 	// Enable *all* debugging logs (in vprintf)
 	// Patch by: SiSTRo
